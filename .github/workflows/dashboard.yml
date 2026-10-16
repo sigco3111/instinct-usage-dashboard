@@ -1,0 +1,47 @@
+name: 대시보드 빌드 & 배포
+
+# 매일 자동 기록은 사용자가 "시작해"라고 확인하기 전까지 비활성화 상태입니다.
+# 활성화하려면 아래 schedule 블록의 주석을 해제하세요.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '0 0 * * *'   # 매일 09:00 KST (00:00 UTC) — "시작해" 확인 후 주석 해제
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # (선택, "시작해" 이후) 하루 사용량 기록을 data/usage.json에 추가하는 자리입니다.
+      # 데이터 소스(Instinct 측 기록)가 연결되면 여기서 append_day.py를 호출합니다.
+      # - name: Append daily record
+      #   run: python3 scripts/append_day.py day.json
+
+      - name: Build static dashboard from data
+        run: python3 scripts/build.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
