@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instinct 사용량 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1020; --panel: #141b33; --panel2: #1a2342; --line: #273156;
+    --text: #e8ecf8; --dim: #8f9bb8; --accent: #5b8cff; --good: #38d39f;
+    --warn: #ffb454; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 80% -10%, #1c2b5a 0%, var(--bg) 55%);
+    color: var(--text); font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    min-height: 100vh; padding: 28px 18px 60px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  h1 { font-size: 26px; letter-spacing: -0.5px; }
+  .badge {
+    font-size: 12px; padding: 3px 10px; border-radius: 999px;
+    background: rgba(255,180,84,.15); color: var(--warn); border: 1px solid rgba(255,180,84,.4);
+  }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 22px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid var(--line); border-radius: 16px; padding: 20px;
+  }
+  .card h2 { font-size: 15px; color: var(--dim); font-weight: 600; margin-bottom: 14px; }
+  .card.wide { grid-column: 1 / -1; }
+  .big-number { font-size: 52px; font-weight: 800; letter-spacing: -1px; }
+  .big-number small { font-size: 22px; color: var(--dim); font-weight: 600; }
+  .gauge-box { position: relative; height: 190px; }
+  .gauge-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .gauge-center .pct { font-size: 34px; font-weight: 800; }
+  .gauge-center .lbl { font-size: 12px; color: var(--dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 600; font-size: 12px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .bar-cell { width: 42%; }
+  .bar-track { background: #0d1430; border-radius: 6px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), #8fb3ff); }
+  .chart-box { position: relative; height: 260px; }
+  footer { margin-top: 26px; color: var(--dim); font-size: 12px; line-height: 1.7; }
+  code { background: #0d1430; padding: 1px 6px; border-radius: 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Instinct 사용량 대시보드</h1>
+    <span class="badge" id="statusBadge">샘플</span>
+  </header>
+  <p class="sub" id="subtitle"></p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>오늘 총 사용률 (일일 예산 대비)</h2>
+      <div class="gauge-box">
+        <canvas id="gauge"></canvas>
+        <div class="gauge-center">
+          <div class="pct" id="gaugePct"></div>
+          <div class="lbl" id="gaugeDate"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>작업별 사용률</h2>
+      <div class="chart-box"><canvas id="agentChart"></canvas></div>
+    </div>
+
+    <div class="card wide">
+      <h2>작업별 상세</h2>
+      <table id="agentTable">
+        <thead><tr><th>작업 (에이전트)</th><th class="bar-cell"></th><th class="num">사용률</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card wide">
+      <h2>일별 추이</h2>
+      <div class="chart-box"><canvas id="trendChart"></canvas></div>
+    </div>
+  </div>
+
+  <footer id="footernote"></footer>
+</div>
+
+<script>
+const DATA = __USAGE_DATA__;
+const meta = DATA.meta || {};
+const days = (DATA.days || []).slice().sort((a, b) => a.date.localeCompare(b.date));
+const latest = days[days.length - 1] || { date: "-", total_percent: 0, agents: [] };
+
+document.getElementById("statusBadge").textContent = meta.status === "live" ? "기록 중" : "샘플";
+document.getElementById("subtitle").textContent =
+  (meta.unit_label || "일일 예산 대비 %") + " · 마지막 갱신 " + (meta.updated_at || "-");
+document.getElementById("footernote").innerHTML =
+  (meta.note || "") + "<br>" + (meta.status_note || "") +
+  "<br>데이터: <code>data/usage.json</code> · 새 날짜 기록이 추가되면 GitHub Actions가 이 페이지를 다시 빌드합니다.";
+
+Chart.defaults.color = "#8f9bb8";
+Chart.defaults.borderColor = "rgba(39,49,86,.6)";
+Chart.defaults.font.family = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+
+const pct = v => (Math.round(v * 10) / 10).toFixed(1) + "%";
+
+// 1) 오늘 게이지
+document.getElementById("gaugePct").textContent = pct(latest.total_percent);
+document.getElementById("gaugeDate").textContent = latest.date;
+new Chart(document.getElementById("gauge"), {
+  type: "doughnut",
+  data: { datasets: [{ data: [latest.total_percent, Math.max(0, 100 - latest.total_percent)],
+    backgroundColor: ["#5b8cff", "#1a2342"], borderWidth: 0, circumference: 270, rotation: 225 }] },
+  options: { cutout: "74%", plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+});
+
+// 2) 작업별 막대
+const agents = (latest.agents || []).slice().sort((a, b) => b.percent - a.percent);
+new Chart(document.getElementById("agentChart"), {
+  type: "bar",
+  data: { labels: agents.map(a => a.name),
+    datasets: [{ data: agents.map(a => a.percent),
+      backgroundColor: ["#5b8cff", "#38d39f", "#ffb454", "#b78cff", "#ff8fb3", "#6bd5ff"].slice(0, agents.length),
+      borderRadius: 8 }] },
+  options: { indexAxis: "y", maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: c => " " + pct(c.parsed.x) } } },
+    scales: { x: { ticks: { callback: v => v + "%" } } } }
+});
+
+// 3) 상세 테이블
+const tbody = document.querySelector("#agentTable tbody");
+const maxV = Math.max(1, ...agents.map(a => a.percent));
+agents.forEach(a => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${a.name}</td>
+    <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(a.percent / maxV) * 100}%"></div></div></td>
+    <td class="num">${pct(a.percent)}</td>`;
+  tbody.appendChild(tr);
+});
+const trTotal = document.createElement("tr");
+trTotal.innerHTML = `<td><strong>합계</strong></td><td class="bar-cell"></td><td class="num"><strong>${pct(latest.total_percent)}</strong></td>`;
+tbody.appendChild(trTotal);
+
+// 4) 일별 추이
+new Chart(document.getElementById("trendChart"), {
+  type: "line",
+  data: { labels: days.map(d => d.date),
+    datasets: [{ label: "총 사용률", data: days.map(d => d.total_percent),
+      borderColor: "#5b8cff", backgroundColor: "rgba(91,140,255,.18)",
+      fill: true, tension: 0.35, pointRadius: 5, pointBackgroundColor: "#5b8cff" }] },
+  options: { maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: c => " " + pct(c.parsed.y) } } },
+    scales: { y: { beginAtZero: true, suggestedMax: 10, ticks: { callback: v => v + "%" } } } }
+});
+</script>
+</body>
+</html>
