@@ -3,21 +3,40 @@
     "title": "Instinct 사용량 대시보드",
     "unit": "percent_of_daily_budget",
     "unit_label": "일일 예산 대비 %",
-    "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다.",
-    "status": "sample",
-    "status_note": "샘플 데이터 — 매일 자동 기록은 사용자가 '시작해'라고 확인한 뒤 활성화됩니다.",
-    "updated_at": "2026-10-16T20:30:00+09:00"
+    "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
+    "status": "live",
+    "status_note": "실제 기록 — 수치는 수동으로 기록하며 자동 스케줄은 비활성화되어 있습니다.",
+    "updated_at": "2026-10-16T23:51:04+09:00"
   },
   "days": [
     {
       "date": "2026-10-16",
       "total_percent": 6.0,
       "agents": [
-        { "name": "공급망 타이쿤 개발", "percent": 5.4 },
-        { "name": "메인 에이전트 (main_agent)", "percent": 0.5 },
-        { "name": "FLOW CAPITAL 기획서 v1.3", "percent": 0.1 },
-        { "name": "hero-lord-web 개선 제안", "percent": 0.0 },
-        { "name": "Proactive value creation", "percent": 0.0 }
+        {
+          "name": "공급망 타이쿤 개발",
+          "percent": 5.4
+        },
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.6
+        },
+        {
+          "name": "FLOW CAPITAL 기획서 v1.3",
+          "percent": 0.1
+        },
+        {
+          "name": "hero-lord-web 개선 제안",
+          "percent": 0.0
+        },
+        {
+          "name": "사용량 대시보드 샘플",
+          "percent": 0.0
+        },
+        {
+          "name": "기타 에이전트 (3)",
+          "percent": 0.0
+        }
       ]
     }
   ]
