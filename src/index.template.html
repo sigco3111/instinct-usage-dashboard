@@ -53,6 +53,30 @@
   .chart-box { position: relative; height: 260px; }
   footer { margin-top: 26px; color: var(--dim); font-size: 12px; line-height: 1.7; }
   code { background: #0d1430; padding: 1px 6px; border-radius: 5px; font-size: 12px; }
+
+  /* 컨트롤 */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  select, input[type="date"] {
+    background: #0d1430; color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 12px; font-size: 14px; font-family: inherit;
+    color-scheme: dark;
+  }
+  select:focus, input[type="date"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .seg { display: flex; background: #0d1430; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button {
+    background: transparent; color: var(--dim); border: none; padding: 9px 16px;
+    font-size: 13px; font-family: inherit; cursor: pointer;
+  }
+  .seg button.active { background: var(--accent); color: #fff; font-weight: 700; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 760px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: #0d1430; border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+  }
+  .stat .v { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .stat .k { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .hint { font-size: 12px; color: var(--dim); margin-top: 8px; }
+  .merged-tag { font-size: 11px; color: var(--dim); }
 </style>
 </head>
 <body>
@@ -64,32 +88,67 @@
   <p class="sub" id="subtitle"></p>
 
   <div class="grid">
-    <div class="card">
-      <h2>오늘 총 사용률 (일일 예산 대비)</h2>
-      <div class="gauge-box">
-        <canvas id="gauge"></canvas>
-        <div class="gauge-center">
-          <div class="pct" id="gaugePct"></div>
-          <div class="lbl" id="gaugeDate"></div>
+    <div class="card wide">
+      <h2>날짜별 상세</h2>
+      <div class="controls">
+        <select id="dateSelect" aria-label="날짜 선택"></select>
+        <span class="hint">날짜를 고르면 아래 게이지·막대·표가 그날 기록으로 바뀝니다.</span>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="gauge-box">
+            <canvas id="gauge"></canvas>
+            <div class="gauge-center">
+              <div class="pct" id="gaugePct"></div>
+              <div class="lbl" id="gaugeDate"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="chart-box"><canvas id="agentChart"></canvas></div>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>작업별 사용률</h2>
-      <div class="chart-box"><canvas id="agentChart"></canvas></div>
-    </div>
-
-    <div class="card wide">
-      <h2>작업별 상세</h2>
-      <table id="agentTable">
+      <table id="agentTable" style="margin-top:16px">
         <thead><tr><th>작업 (에이전트)</th><th class="bar-cell"></th><th class="num">사용률</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
 
     <div class="card wide">
-      <h2>일별 추이</h2>
+      <h2>작업별 추이</h2>
+      <div class="chart-box" style="height:300px"><canvas id="taskTrendChart"></canvas></div>
+      <p class="hint">이름 뒤의 회차 표기(예: “… 설계”, “… 설계 2”)는 같은 작업으로 합쳐서 그립니다. 범례를 누르면 선을 켜고 끌 수 있습니다. 굵은 파란 선은 하루 총 사용률입니다.</p>
+    </div>
+
+    <div class="card wide">
+      <h2>기간 통계</h2>
+      <div class="controls">
+        <div class="seg" id="rangeMode">
+          <button data-mode="month" class="active">월별</button>
+          <button data-mode="year">연별</button>
+          <button data-mode="custom">기간 지정</button>
+        </div>
+        <select id="monthSelect" aria-label="월 선택"></select>
+        <select id="yearSelect" aria-label="연도 선택" hidden></select>
+        <span id="customRange" hidden>
+          <input type="date" id="fromDate" aria-label="시작일"> ~
+          <input type="date" id="toDate" aria-label="종료일">
+        </span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="v" id="statTotal">-</div><div class="k">기간 합계 사용률</div></div>
+        <div class="stat"><div class="v" id="statAvg">-</div><div class="k">일 평균 (기록된 날 기준)</div></div>
+        <div class="stat"><div class="v" id="statPeak">-</div><div class="k" id="statPeakDay">최고 사용일</div></div>
+        <div class="stat"><div class="v" id="statDays">-</div><div class="k">기록된 일수</div></div>
+      </div>
+      <table id="rangeTable">
+        <thead><tr><th>기간 내 상위 작업</th><th class="bar-cell"></th><th class="num">합계</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card wide">
+      <h2>일별 총 사용률 추이</h2>
       <div class="chart-box"><canvas id="trendChart"></canvas></div>
     </div>
   </div>
@@ -101,7 +160,6 @@
 const DATA = __USAGE_DATA__;
 const meta = DATA.meta || {};
 const days = (DATA.days || []).slice().sort((a, b) => a.date.localeCompare(b.date));
-const latest = days[days.length - 1] || { date: "-", total_percent: 0, agents: [] };
 
 document.getElementById("statusBadge").textContent = meta.status === "live" ? "기록 중" : "샘플";
 document.getElementById("subtitle").textContent =
@@ -115,49 +173,194 @@ Chart.defaults.borderColor = "rgba(39,49,86,.6)";
 Chart.defaults.font.family = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
 
 const pct = v => (Math.round(v * 10) / 10).toFixed(1) + "%";
+const PALETTE = ["#38d39f", "#ffb454", "#b78cff", "#ff8fb3", "#6bd5ff", "#ffd166", "#7ee081", "#ff9f6b", "#8fb3ff", "#e0aaff"];
 
-// 1) 오늘 게이지
-document.getElementById("gaugePct").textContent = pct(latest.total_percent);
-document.getElementById("gaugeDate").textContent = latest.date;
-new Chart(document.getElementById("gauge"), {
-  type: "doughnut",
-  data: { datasets: [{ data: [latest.total_percent, Math.max(0, 100 - latest.total_percent)],
-    backgroundColor: ["#5b8cff", "#1a2342"], borderWidth: 0, circumference: 270, rotation: 225 }] },
-  options: { cutout: "74%", plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+// 이름 정규화: "기타 에이전트 (3)" → "기타 에이전트", "… 설계 2" → "… 설계"
+function normName(name) {
+  return String(name).replace(/\s*\(\d+\)\s*$/, "").replace(/\s+\d+$/, "").trim();
+}
+
+// 하루의 작업 목록을 정규화 이름으로 합산
+function mergedAgents(day) {
+  const acc = new Map();
+  (day.agents || []).forEach(a => {
+    const n = normName(a.name);
+    const cur = acc.get(n) || { name: n, percent: 0, merged: false, variants: new Set() };
+    cur.percent += a.percent;
+    cur.variants.add(a.name);
+    if (cur.variants.size > 1) cur.merged = true;
+    acc.set(n, cur);
+  });
+  return [...acc.values()].sort((a, b) => b.percent - a.percent);
+}
+
+const byDate = new Map(days.map(d => [d.date, d]));
+const dateList = days.map(d => d.date);
+
+/* ---------- 1) 날짜별 상세 ---------- */
+const dateSelect = document.getElementById("dateSelect");
+dateList.slice().reverse().forEach(dt => {
+  const opt = document.createElement("option");
+  opt.value = dt; opt.textContent = dt;
+  dateSelect.appendChild(opt);
+});
+dateSelect.value = dateList[dateList.length - 1] || "";
+
+let gaugeChart = null, agentChart = null;
+
+function renderDay(dt) {
+  const day = byDate.get(dt);
+  if (!day) return;
+  const agents = mergedAgents(day);
+
+  document.getElementById("gaugePct").textContent = pct(day.total_percent);
+  document.getElementById("gaugeDate").textContent = dt;
+  if (gaugeChart) gaugeChart.destroy();
+  gaugeChart = new Chart(document.getElementById("gauge"), {
+    type: "doughnut",
+    data: { datasets: [{ data: [day.total_percent, Math.max(0, 100 - day.total_percent)],
+      backgroundColor: ["#5b8cff", "#1a2342"], borderWidth: 0, circumference: 270, rotation: 225 }] },
+    options: { cutout: "74%", plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+  });
+
+  if (agentChart) agentChart.destroy();
+  agentChart = new Chart(document.getElementById("agentChart"), {
+    type: "bar",
+    data: { labels: agents.map(a => a.name),
+      datasets: [{ data: agents.map(a => a.percent),
+        backgroundColor: agents.map((_, i) => PALETTE[i % PALETTE.length]), borderRadius: 8 }] },
+    options: { indexAxis: "y", maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => " " + pct(c.parsed.x) } } },
+      scales: { x: { ticks: { callback: v => v + "%" } } } }
+  });
+
+  const tbody = document.querySelector("#agentTable tbody");
+  tbody.innerHTML = "";
+  const maxV = Math.max(1, ...agents.map(a => a.percent));
+  agents.forEach(a => {
+    const tr = document.createElement("tr");
+    const variants = a.merged ? ` <span class="merged-tag">(${[...a.variants].join(" + ")})</span>` : "";
+    tr.innerHTML = `<td>${a.name}${variants}</td>
+      <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(a.percent / maxV) * 100}%"></div></div></td>
+      <td class="num">${pct(a.percent)}</td>`;
+    tbody.appendChild(tr);
+  });
+  const trTotal = document.createElement("tr");
+  trTotal.innerHTML = `<td><strong>합계</strong></td><td class="bar-cell"></td><td class="num"><strong>${pct(day.total_percent)}</strong></td>`;
+  tbody.appendChild(trTotal);
+}
+dateSelect.addEventListener("change", () => renderDay(dateSelect.value));
+if (dateSelect.value) renderDay(dateSelect.value);
+
+/* ---------- 2) 작업별 추이 ---------- */
+const taskTotals = new Map();
+days.forEach(d => mergedAgents(d).forEach(a => {
+  taskTotals.set(a.name, (taskTotals.get(a.name) || 0) + a.percent);
+}));
+const taskNames = [...taskTotals.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
+
+const trendDatasets = [{
+  label: "하루 총 사용률",
+  data: days.map(d => d.total_percent),
+  borderColor: "#5b8cff", backgroundColor: "rgba(91,140,255,.15)",
+  borderWidth: 3, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: "#5b8cff"
+}];
+taskNames.forEach((name, i) => {
+  trendDatasets.push({
+    label: name,
+    data: days.map(d => {
+      const hit = mergedAgents(d).find(a => a.name === name);
+      return hit ? hit.percent : 0;
+    }),
+    borderColor: PALETTE[i % PALETTE.length],
+    backgroundColor: PALETTE[i % PALETTE.length],
+    borderWidth: 2, fill: false, tension: 0.3, pointRadius: 3,
+    hidden: i >= 5
+  });
+});
+new Chart(document.getElementById("taskTrendChart"), {
+  type: "line",
+  data: { labels: dateList, datasets: trendDatasets },
+  options: { maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { label: c => " " + c.dataset.label + ": " + pct(c.parsed.y) } }
+    },
+    scales: { y: { beginAtZero: true, ticks: { callback: v => v + "%" } } } }
 });
 
-// 2) 작업별 막대
-const agents = (latest.agents || []).slice().sort((a, b) => b.percent - a.percent);
-new Chart(document.getElementById("agentChart"), {
-  type: "bar",
-  data: { labels: agents.map(a => a.name),
-    datasets: [{ data: agents.map(a => a.percent),
-      backgroundColor: ["#5b8cff", "#38d39f", "#ffb454", "#b78cff", "#ff8fb3", "#6bd5ff"].slice(0, agents.length),
-      borderRadius: 8 }] },
-  options: { indexAxis: "y", maintainAspectRatio: false,
-    plugins: { legend: { display: false },
-      tooltip: { callbacks: { label: c => " " + pct(c.parsed.x) } } },
-    scales: { x: { ticks: { callback: v => v + "%" } } } }
-});
+/* ---------- 3) 기간 통계 ---------- */
+const monthSelect = document.getElementById("monthSelect");
+const yearSelect = document.getElementById("yearSelect");
+const fromDate = document.getElementById("fromDate");
+const toDate = document.getElementById("toDate");
+const customRange = document.getElementById("customRange");
 
-// 3) 상세 테이블
-const tbody = document.querySelector("#agentTable tbody");
-const maxV = Math.max(1, ...agents.map(a => a.percent));
-agents.forEach(a => {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `<td>${a.name}</td>
-    <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(a.percent / maxV) * 100}%"></div></div></td>
-    <td class="num">${pct(a.percent)}</td>`;
-  tbody.appendChild(tr);
-});
-const trTotal = document.createElement("tr");
-trTotal.innerHTML = `<td><strong>합계</strong></td><td class="bar-cell"></td><td class="num"><strong>${pct(latest.total_percent)}</strong></td>`;
-tbody.appendChild(trTotal);
+const months = [...new Set(dateList.map(d => d.slice(0, 7)))].sort().reverse();
+const years = [...new Set(dateList.map(d => d.slice(0, 4)))].sort().reverse();
+months.forEach(m => { const o = document.createElement("option"); o.value = m; o.textContent = m.replace("-", "년 ") + "월"; monthSelect.appendChild(o); });
+years.forEach(y => { const o = document.createElement("option"); o.value = y; o.textContent = y + "년"; yearSelect.appendChild(o); });
+if (dateList.length) { fromDate.min = toDate.min = dateList[0]; fromDate.max = toDate.max = dateList[dateList.length - 1]; fromDate.value = dateList[0]; toDate.value = dateList[dateList.length - 1]; }
 
-// 4) 일별 추이
+let mode = "month";
+document.querySelectorAll("#rangeMode button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#rangeMode button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    mode = btn.dataset.mode;
+    monthSelect.hidden = mode !== "month";
+    yearSelect.hidden = mode !== "year";
+    customRange.hidden = mode !== "custom";
+    renderRange();
+  });
+});
+[monthSelect, yearSelect, fromDate, toDate].forEach(el => el.addEventListener("change", renderRange));
+
+function rangeDays() {
+  if (mode === "month") return days.filter(d => d.date.startsWith(monthSelect.value));
+  if (mode === "year") return days.filter(d => d.date.startsWith(yearSelect.value));
+  const f = fromDate.value, t = toDate.value;
+  if (!f || !t) return [];
+  return days.filter(d => d.date >= f && d.date <= t);
+}
+
+function renderRange() {
+  const sel = rangeDays();
+  const total = sel.reduce((s, d) => s + d.total_percent, 0);
+  const peak = sel.reduce((best, d) => (!best || d.total_percent > best.total_percent) ? d : best, null);
+  document.getElementById("statTotal").textContent = pct(total);
+  document.getElementById("statAvg").textContent = sel.length ? pct(total / sel.length) : "-";
+  document.getElementById("statPeak").textContent = peak ? pct(peak.total_percent) : "-";
+  document.getElementById("statPeakDay").textContent = peak ? "최고 사용일 · " + peak.date : "최고 사용일";
+  document.getElementById("statDays").textContent = sel.length + "일";
+
+  const acc = new Map();
+  sel.forEach(d => mergedAgents(d).forEach(a => acc.set(a.name, (acc.get(a.name) || 0) + a.percent)));
+  const top = [...acc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const tbody = document.querySelector("#rangeTable tbody");
+  tbody.innerHTML = "";
+  const maxV = Math.max(1, ...top.map(e => e[1]));
+  top.forEach(([name, v]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${name}</td>
+      <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(v / maxV) * 100}%"></div></div></td>
+      <td class="num">${pct(v)}</td>`;
+    tbody.appendChild(tr);
+  });
+  if (!top.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3" style="color:var(--dim)">이 기간에 기록된 데이터가 없습니다.</td>`;
+    tbody.appendChild(tr);
+  }
+}
+renderRange();
+
+/* ---------- 4) 일별 총 사용률 추이 ---------- */
 new Chart(document.getElementById("trendChart"), {
   type: "line",
-  data: { labels: days.map(d => d.date),
+  data: { labels: dateList,
     datasets: [{ label: "총 사용률", data: days.map(d => d.total_percent),
       borderColor: "#5b8cff", backgroundColor: "rgba(91,140,255,.18)",
       fill: true, tension: 0.35, pointRadius: 5, pointBackgroundColor: "#5b8cff" }] },
