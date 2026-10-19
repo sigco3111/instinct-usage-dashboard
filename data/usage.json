@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 수치는 수동으로 기록하며 자동 스케줄은 비활성화되어 있습니다.",
-    "updated_at": "2026-10-18T23:49:00+09:00"
+    "updated_at": "2026-10-19T23:49:00+09:00"
   },
   "days": [
     {
@@ -96,6 +96,37 @@
         {
           "name": "기타 에이전트 (5)",
           "percent": 0.0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "total_percent": 2.3,
+      "remaining_percent": 97.7,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.4
+        },
+        {
+          "name": "SNKRX 오마주 설계서",
+          "percent": 0.4
+        },
+        {
+          "name": "snkrx 2배 해상도 렌더링",
+          "percent": 0.3
+        },
+        {
+          "name": "snkrx 웹 비율 수정",
+          "percent": 0.1
+        },
+        {
+          "name": "한글화 (perilous-ways, Notbell)",
+          "percent": 0.1
+        },
+        {
+          "name": "기타 에이전트 (12)",
+          "percent": 0.1
         }
       ]
     }
