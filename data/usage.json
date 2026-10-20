@@ -6,12 +6,12 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 수치는 수동으로 기록하며 자동 스케줄은 비활성화되어 있습니다.",
-    "updated_at": "2026-10-19T23:49:00+09:00"
+    "updated_at": "2026-10-20T23:48:00+09:00"
   },
   "days": [
     {
       "date": "2026-10-16",
-      "total_percent": 6.0,
+      "total_percent": 6,
       "agents": [
         {
           "name": "공급망 타이쿤 개발",
@@ -27,15 +27,15 @@
         },
         {
           "name": "hero-lord-web 개선 제안",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "사용량 대시보드 샘플",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "기타 에이전트 (3)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -57,15 +57,15 @@
         },
         {
           "name": "kkiritest 사이트 분석",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "생태계 수족관 설계",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "기타 에이전트 (1)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -83,19 +83,19 @@
         },
         {
           "name": "푸른 순환 R19 수조 확장",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "생태계 수족관 설계 2",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "usage dashboard 상세·통계",
-          "percent": 0.0
+          "percent": 0
         },
         {
           "name": "기타 에이전트 (5)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -127,6 +127,33 @@
         {
           "name": "기타 에이전트 (12)",
           "percent": 0.1
+        }
+      ]
+    },
+    {
+      "date": "2026-10-20",
+      "total_percent": 5.5,
+      "remaining_percent": 94.5,
+      "agents": [
+        {
+          "name": "SNKRX 오마주 설계서",
+          "percent": 3.9
+        },
+        {
+          "name": "메인 에이전트",
+          "percent": 1.5
+        },
+        {
+          "name": "unchartedwaters2 포크 개선",
+          "percent": 0
+        },
+        {
+          "name": "unchartedwaters2 가능성 검토",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (2)",
+          "percent": 0
         }
       ]
     }
