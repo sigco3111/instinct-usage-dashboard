@@ -6,97 +6,43 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 수치는 수동으로 기록하며 자동 스케줄은 비활성화되어 있습니다.",
-    "updated_at": "2026-10-20T23:48:00+09:00"
+    "updated_at": "2026-10-21T23:49:00+09:00"
   },
   "days": [
     {
       "date": "2026-10-16",
       "total_percent": 6,
       "agents": [
-        {
-          "name": "공급망 타이쿤 개발",
-          "percent": 5.4
-        },
-        {
-          "name": "메인 에이전트 (main_agent)",
-          "percent": 0.6
-        },
-        {
-          "name": "FLOW CAPITAL 기획서 v1.3",
-          "percent": 0.1
-        },
-        {
-          "name": "hero-lord-web 개선 제안",
-          "percent": 0
-        },
-        {
-          "name": "사용량 대시보드 샘플",
-          "percent": 0
-        },
-        {
-          "name": "기타 에이전트 (3)",
-          "percent": 0
-        }
+        {"name": "공급망 타이쿤 개발", "percent": 5.4},
+        {"name": "메인 에이전트 (main_agent)", "percent": 0.6},
+        {"name": "FLOW CAPITAL 기획서 v1.3", "percent": 0.1},
+        {"name": "hero-lord-web 개선 제안", "percent": 0},
+        {"name": "사용량 대시보드 샘플", "percent": 0},
+        {"name": "기타 에이전트 (3)", "percent": 0}
       ]
     },
     {
       "date": "2026-10-17",
       "total_percent": 0.8,
       "agents": [
-        {
-          "name": "메인 에이전트 (main_agent)",
-          "percent": 0.7
-        },
-        {
-          "name": "생태계 수족관 설계 2",
-          "percent": 0.1
-        },
-        {
-          "name": "다음 생 오마주 설계서",
-          "percent": 0.1
-        },
-        {
-          "name": "kkiritest 사이트 분석",
-          "percent": 0
-        },
-        {
-          "name": "생태계 수족관 설계",
-          "percent": 0
-        },
-        {
-          "name": "기타 에이전트 (1)",
-          "percent": 0
-        }
+        {"name": "메인 에이전트 (main_agent)", "percent": 0.7},
+        {"name": "생태계 수족관 설계 2", "percent": 0.1},
+        {"name": "다음 생 오마주 설계서", "percent": 0.1},
+        {"name": "kkiritest 사이트 분석", "percent": 0},
+        {"name": "생태계 수족관 설계", "percent": 0},
+        {"name": "기타 에이전트 (1)", "percent": 0}
       ]
     },
     {
       "date": "2026-10-18",
       "total_percent": 0.6,
       "agents": [
-        {
-          "name": "메인 에이전트 (main_agent)",
-          "percent": 0.5
-        },
-        {
-          "name": "푸른 순환 v1.8 배포",
-          "percent": 0.1
-        },
-        {
-          "name": "푸른 순환 R19 수조 확장",
-          "percent": 0
-        },
-        {
-          "name": "생태계 수족관 설계 2",
-          "percent": 0
-        },
-        {
-          "name": "usage dashboard 상세·통계",
-          "percent": 0
-        },
-        {
-          "name": "기타 에이전트 (5)",
-          "percent": 0
-        }
+        {"name": "메인 에이전트 (main_agent)", "percent": 0.5},
+        {"name": "푸른 순환 v1.8 배포", "percent": 0.1},
+        {"name": "푸른 순환 R19 수조 확장", "percent": 0},
+        {"name": "생태계 수족관 설계 2", "percent": 0},
+        {"name": "usage dashboard 상세·통계", "percent": 0},
+        {"name": "기타 에이전트 (5)", "percent": 0}
       ]
     },
     {
@@ -104,30 +50,12 @@
       "total_percent": 2.3,
       "remaining_percent": 97.7,
       "agents": [
-        {
-          "name": "메인 에이전트",
-          "percent": 1.4
-        },
-        {
-          "name": "SNKRX 오마주 설계서",
-          "percent": 0.4
-        },
-        {
-          "name": "snkrx 2배 해상도 렌더링",
-          "percent": 0.3
-        },
-        {
-          "name": "snkrx 웹 비율 수정",
-          "percent": 0.1
-        },
-        {
-          "name": "한글화 (perilous-ways, Notbell)",
-          "percent": 0.1
-        },
-        {
-          "name": "기타 에이전트 (12)",
-          "percent": 0.1
-        }
+        {"name": "메인 에이전트", "percent": 1.4},
+        {"name": "SNKRX 오마주 설계서", "percent": 0.4},
+        {"name": "snkrx 2배 해상도 렌더링", "percent": 0.3},
+        {"name": "snkrx 웹 비율 수정", "percent": 0.1},
+        {"name": "한글화 (perilous-ways, Notbell)", "percent": 0.1},
+        {"name": "기타 에이전트 (12)", "percent": 0.1}
       ]
     },
     {
@@ -135,26 +63,24 @@
       "total_percent": 5.5,
       "remaining_percent": 94.5,
       "agents": [
-        {
-          "name": "SNKRX 오마주 설계서",
-          "percent": 3.9
-        },
-        {
-          "name": "메인 에이전트",
-          "percent": 1.5
-        },
-        {
-          "name": "unchartedwaters2 포크 개선",
-          "percent": 0
-        },
-        {
-          "name": "unchartedwaters2 가능성 검토",
-          "percent": 0
-        },
-        {
-          "name": "기타 에이전트 (2)",
-          "percent": 0
-        }
+        {"name": "SNKRX 오마주 설계서", "percent": 3.9},
+        {"name": "메인 에이전트", "percent": 1.5},
+        {"name": "unchartedwaters2 포크 개선", "percent": 0},
+        {"name": "unchartedwaters2 가능성 검토", "percent": 0},
+        {"name": "기타 에이전트 (2)", "percent": 0}
+      ]
+    },
+    {
+      "date": "2026-10-21",
+      "total_percent": 1.2,
+      "remaining_percent": 98.8,
+      "agents": [
+        {"name": "메인 에이전트", "percent": 0.8},
+        {"name": "unchartedwaters2 터치 마무리", "percent": 0.2},
+        {"name": "OpenFront 싱글 개선판 개발", "percent": 0.1},
+        {"name": "히어로즈2 웹 한글화", "percent": 0.1},
+        {"name": "unchartedwaters2 포크 개선", "percent": 0},
+        {"name": "기타 에이전트 (13)", "percent": 0.1}
       ]
     }
   ]
