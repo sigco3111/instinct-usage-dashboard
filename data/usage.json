@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 수치는 수동으로 기록하며 자동 스케줄은 비활성화되어 있습니다.",
-    "updated_at": "2026-10-22T23:49:00+09:00"
+    "updated_at": "2026-10-23T23:48:00+09:00"
   },
   "days": [
     {
@@ -216,6 +216,37 @@
         {
           "name": "기타 에이전트 (14)",
           "percent": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "total_percent": 3,
+      "remaining_percent": 97,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.2
+        },
+        {
+          "name": "시대의 물결 오전8시까지 자율 고도화",
+          "percent": 0.6
+        },
+        {
+          "name": "Genesis Atlas resource economy",
+          "percent": 0.5
+        },
+        {
+          "name": "세계 문명 시뮬레이션 야간 개발",
+          "percent": 0.4
+        },
+        {
+          "name": "Genesis Atlas war history map",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (30)",
+          "percent": 0.3
         }
       ]
     }
