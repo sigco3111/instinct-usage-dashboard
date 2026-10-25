@@ -294,7 +294,7 @@ function renderDay(dt) {
   const avgAll = days.reduce((a, d) => a + d.total_percent, 0) / (days.length || 1);
   const col = day.total_percent >= avgAll * 1.5 ? "#ffb454" : "#5b8cff";
   document.getElementById("gaugeScale").textContent =
-    "눈금 0–" + gmax + "% (전체 100% 중 확대) · 흰 선 = 기록 평균 " + pct(avgAll);
+    "눈금 0–" + gmax + "%" + (gmax < 100 ? " (전체 100% 중 확대)" : "") + " · 흰 선 = 기록 평균 " + pct(avgAll);
   gaugeChart = new Chart(document.getElementById("gauge"), {
     type: "doughnut",
     data: { datasets: [{ data: [Math.min(day.total_percent, gmax), Math.max(0, gmax - day.total_percent)],
