@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Instinct 사용량 대시보드</title>
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="Instinct 일일 예산 대비 사용률(%) 기록 대시보드">
+<meta property="og:title" content="Instinct 사용량 대시보드">
+<meta property="og:description" content="일일 예산 대비 사용률(%)을 날짜·프로젝트별로 보는 공개 대시보드">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1020'/%3E%3Cpath d='M12 46 L26 28 L36 38 L52 16' fill='none' stroke='%235b8cff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -238,7 +243,7 @@
   .tag-pf { display: inline-block; margin-left: 8px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; vertical-align: 2px; }
   .cell.np { background: transparent; border: 1px dashed #36427a; color: var(--dim); }
   .cell.np .p { font-size: 13px; font-weight: 600; opacity: .7; }
-  @media (max-width: 760px) { .pf-bar { top: 0; } }
+  @media (max-width: 760px) { .pf-bar { position: static; } }
 
   /* ===== v7: 인사이트 / 요일 / 점검 / 내보내기 / 히트맵 ===== */
   .ins-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
@@ -263,6 +268,15 @@
   .exp-row input { background: #0b1020; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; font-family: inherit; }
   .btn { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
   .btn.ghost { background: #0d1430; color: var(--text); border: 1px solid var(--line); }
+
+  /* ===== v8 ===== */
+  .pf-hit td { background: rgba(91,140,255,.16); }
+  .pf-hit td:first-child { box-shadow: 3px 0 0 var(--accent) inset; padding-left: 10px; }
+  .daynav { display: inline-flex; gap: 6px; }
+  .daynav button { background: #0d1430; color: var(--text); border: 1px solid var(--line); border-radius: 10px; width: 36px; height: 36px; font-size: 15px; font-family: inherit; cursor: pointer; }
+  .daynav button:disabled { opacity: .35; cursor: default; }
+  #wkTable td.n, #wkTable th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #wkTable .na { color: var(--dim); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -307,6 +321,7 @@
       <h2>날짜별 상세</h2>
       <div class="controls">
         <select id="dateSelect" aria-label="날짜 선택"></select>
+        <span class="daynav"><button id="dayPrev" aria-label="이전 기록일">‹</button><button id="dayNext" aria-label="다음 기록일">›</button></span>
         <span class="hint">날짜를 고르면 아래 게이지·막대·표가 그날 기록으로 바뀝니다.</span>
       </div>
       <div class="grid">
@@ -371,6 +386,12 @@
       <h2>인사이트 <span class="hint" style="margin:0 0 0 6px;font-weight:400">기록에서 자동으로 계산합니다</span></h2>
       <div class="ins-grid" id="insGrid"></div>
       <p class="hint" id="insNote"></p>
+    </div>
+
+    <div class="card wide tab-panel" data-tab="stats">
+      <h2>주간 요약 <span class="hint" style="margin:0 0 0 6px;font-weight:400">월~일 기준 · 기록된 날만 계산</span></h2>
+      <table id="wkTable"><thead><tr><th>주</th><th class="n">기록일</th><th class="n">일평균</th><th class="n">합계</th><th class="n">최고일</th><th class="n">전주 대비</th></tr></thead><tbody></tbody></table>
+      <p class="hint" id="wkNote"></p>
     </div>
 
     <div class="card wide tab-panel" data-tab="stats">
@@ -566,13 +587,19 @@ function renderDay(dt) {
     tr.innerHTML = `<td>${a.name}${variants}</td>
       <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(a.percent / maxV) * 100}%"></div></div></td>
       <td class="num">${pct(a.percent)}</td>`;
+    if (window.__pfCur && projectOf(a.name).key === window.__pfCur) tr.className = "pf-hit";
     tbody.appendChild(tr);
   });
   const trTotal = document.createElement("tr");
   trTotal.innerHTML = `<td><strong>합계</strong></td><td class="bar-cell"></td><td class="num"><strong>${pct(day.total_percent)}</strong></td>`;
   tbody.appendChild(trTotal);
 }
-dateSelect.addEventListener("change", () => renderDay(dateSelect.value));
+dateSelect.addEventListener("change", () => { renderDay(dateSelect.value); syncNav(); });
+function syncNav() { const i = dateList.indexOf(dateSelect.value); document.getElementById("dayPrev").disabled = i <= 0; document.getElementById("dayNext").disabled = i < 0 || i >= dateList.length - 1; }
+document.getElementById("dayPrev").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i > 0) { dateSelect.value = dateList[i - 1]; renderDay(dateSelect.value); syncNav(); } };
+document.getElementById("dayNext").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i < dateList.length - 1) { dateSelect.value = dateList[i + 1]; renderDay(dateSelect.value); syncNav(); } };
+document.addEventListener("pfchange", () => { if (dateSelect.value) renderDay(dateSelect.value);
+syncNav(); });
 if (dateSelect.value) renderDay(dateSelect.value);
 
 /* ---------- 2) 작업별 추이 ---------- */
@@ -852,7 +879,7 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
         <button class="go" id="calGo">이 날짜 상세 보기 ↓</button>`;
     }
     document.getElementById("calGo").onclick = () => {
-      dateSelect.value = dt; renderDay(dt);
+      dateSelect.value = dt; renderDay(dt); syncNav();
       document.getElementById("dateSelect").closest(".card").scrollIntoView({ behavior: "smooth", block: "start" });
     };
   }
@@ -975,7 +1002,8 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   sel.innerHTML = `<option value="">전체 (필터 없음)</option>` + opts.map(g => `<option value="${g.name}">${g.name} · 누적 ${pct(g.total)}</option>`).join("");
   let cur = null, tChart = null;
   function setFilter(k) {
-    cur = k && PJ.has(k) ? k : null;
+    cur = k && PJ.has(k) ? k : null; window.__pfCur = cur;
+    try { history.replaceState(null, "", cur ? "#project=" + encodeURIComponent(cur) : location.pathname + location.search); } catch (e) {}
     sel.value = cur || "";
     bar.classList.toggle("on", !!cur);
     const st = document.getElementById("pfStatus");
@@ -1004,6 +1032,7 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     document.dispatchEvent(new CustomEvent("pfchange", { detail: cur }));
   }
   window.__pf = setFilter;
+  { const m = /^#project=(.+)$/.exec(location.hash); if (m) { try { setFilter(decodeURIComponent(m[1])); } catch (e) {} } }
   sel.addEventListener("change", () => setFilter(sel.value || null));
   document.getElementById("pfClear").addEventListener("click", () => setFilter(null));
   document.getElementById("pjFilterBtn").addEventListener("click", () => {
@@ -1150,6 +1179,27 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   })();
+})();
+
+/* ---------- v8: 주간 요약 ---------- */
+(function weekly() {
+  if (!days.length) return;
+  const parse = ds => new Date(ds + "T00:00:00Z");
+  const addD = (ds, n) => { const d = parse(ds); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const mon = ds => addD(ds, -((parse(ds).getUTCDay() + 6) % 7));
+  const weeks = new Map();
+  days.forEach(d => { const k = mon(d.date); const w = weeks.get(k) || { k, n: 0, sum: 0, peak: null }; w.n++; w.sum += d.total_percent; if (!w.peak || d.total_percent > w.peak.total_percent) w.peak = d; weeks.set(k, w); });
+  const list = [...weeks.values()].sort((a, b) => a.k.localeCompare(b.k));
+  const md = ds => ds.slice(5).replace("-", "/");
+  const rows = list.map((w, i) => {
+    const avg = w.sum / w.n, prev = i ? list[i - 1] : null;
+    let cmp = '<span class="na">-</span>';
+    if (prev) { const d = avg - prev.sum / prev.n; const lim = w.n < 3 || prev.n < 3;
+      cmp = (d > 0.05 ? "+" : d < -0.05 ? "-" : "±") + Math.abs(Math.round(d * 10) / 10).toFixed(1) + "%p" + (lim ? " *" : ""); }
+    return `<tr><td>${md(w.k)} ~ ${md(addD(w.k, 6))}</td><td class="n">${w.n}일</td><td class="n"><b>${pct(avg)}</b></td><td class="n">${pct(w.sum)}</td><td class="n">${pct(w.peak.total_percent)} (${md(w.peak.date)})</td><td class="n">${cmp}</td></tr>`;
+  }).reverse();
+  document.querySelector("#wkTable tbody").innerHTML = rows.join("");
+  document.getElementById("wkNote").textContent = "* 기록일이 3일 미만인 주가 끼어 있어 참고용입니다. 기록일 수가 다른 주끼리는 합계 대신 일평균으로 비교하세요.";
 })();
 
 /* ---------- 기간 비교 (기록일 기준 일평균, 표시 단계 계산만) ---------- */
