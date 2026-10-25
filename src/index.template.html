@@ -155,6 +155,52 @@
     .tabbar button { font-size: 13px; padding: 10px 2px; }
     #pjTable .hide-m { display: none; }
   }
+
+  /* ===== v4: 활동 캘린더 ===== */
+  .cal-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cal-head .ttl { font-size: 16px; font-weight: 700; min-width: 96px; text-align: center; }
+  .cal-head button.nav { background: #0d1430; color: var(--text); border: 1px solid var(--line); border-radius: 10px; width: 36px; height: 36px; font-size: 16px; font-family: inherit; cursor: pointer; }
+  .cal-head button.nav:disabled { opacity: .35; cursor: default; }
+  .cal-sum { margin-left: auto; font-size: 12px; color: var(--dim); }
+  .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .cal .dow { text-align: center; font-size: 12px; color: var(--dim); padding-bottom: 2px; }
+  .cal .dow.we { color: #ff9fb3; }
+  .cell {
+    position: relative; min-height: 64px; border-radius: 10px; padding: 6px 7px; text-align: left;
+    border: 1px solid var(--line); background: transparent; color: var(--text);
+    font-family: inherit; display: flex; flex-direction: column; justify-content: space-between; cursor: default;
+  }
+  .cell .d { font-size: 11px; color: var(--dim); }
+  .cell .p { font-size: 15px; font-weight: 800; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+  .cell .p small { font-size: 10px; font-weight: 600; opacity: .8; }
+  .cell.out { visibility: hidden; }
+  .cell.future { border-style: dotted; opacity: .35; }
+  .cell.none { border-style: dashed; color: var(--dim);
+    background: repeating-linear-gradient(135deg, rgba(143,155,184,.10) 0 6px, transparent 6px 12px); }
+  .cell.none .p { font-size: 11px; font-weight: 600; }
+  .cell.rec { cursor: pointer; border-color: transparent; }
+  .cell.rec:hover { outline: 2px solid #fff6; }
+  .cell.l0 { background: #1b2447; border: 1px solid #36427a; }
+  .cell.l1 { background: #1f3a78; } .cell.l2 { background: #2a5bc4; }
+  .cell.l3 { background: #4b82ff; } .cell.l4 { background: #9ec0ff; color: #0b1020; }
+  .cell.l4 .d { color: #2a3558; }
+  .cell.today { outline: 2px solid var(--warn); outline-offset: -1px; }
+  .cell.sel { outline: 3px solid #fff; outline-offset: -2px; }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 11.5px; color: var(--dim); margin-top: 12px; }
+  .cal-legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -3px; margin-right: 4px; border: 1px solid transparent; }
+  .cal-pick { background: #0d1430; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-top: 14px; font-size: 13px; }
+  .cal-pick .t { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .cal-pick ul { list-style: none; margin: 8px 0; }
+  .cal-pick li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .cal-pick li:last-child { border-bottom: none; }
+  .cal-pick button.go { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-family: inherit; font-weight: 700; cursor: pointer; }
+  @media (max-width: 760px) {
+    .cal { gap: 4px; }
+    .cell { min-height: 54px; padding: 5px 5px; border-radius: 8px; }
+    .cell .p { font-size: 13px; }
+    .cell.none .p { font-size: 10px; }
+    .cal-sum { margin-left: 0; flex-basis: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -176,6 +222,19 @@
   </section>
 
   <div class="grid">
+    <div class="card wide tab-panel active" data-tab="detail">
+      <h2>활동 캘린더 <span class="hint" style="margin:0 0 0 6px;font-weight:400">날짜를 누르면 그날 작업을 볼 수 있습니다</span></h2>
+      <div class="cal-head">
+        <button class="nav" id="calPrev" aria-label="이전 달">‹</button>
+        <div class="ttl" id="calTitle"></div>
+        <button class="nav" id="calNext" aria-label="다음 달">›</button>
+        <div class="cal-sum" id="calSum"></div>
+      </div>
+      <div class="cal" id="calGrid"></div>
+      <div class="cal-legend" id="calLegend"></div>
+      <div class="cal-pick" id="calPick" hidden></div>
+    </div>
+
     <div class="card wide tab-panel active" data-tab="detail">
       <h2>날짜별 상세</h2>
       <div class="controls">
@@ -613,6 +672,89 @@ function showProject(key) {
   });
 }
 if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
+
+/* ---------- 6) 활동 캘린더 ---------- */
+(function calendar() {
+  if (!days.length) { document.getElementById("calSum").textContent = "기록된 데이터가 없습니다."; return; }
+  const DOW = ["월", "화", "수", "목", "금", "토", "일"];
+  const todayKST = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const utc = ds => new Date(ds + "T00:00:00Z");
+  const iso = t => new Date(t).toISOString().slice(0, 10);
+  const wd = ds => (utc(ds).getUTCDay() + 6) % 7;          // 월=0 … 일=6
+  const maxV = Math.max(...days.map(d => d.total_percent));
+  const T1 = maxV * 0.25, T2 = maxV * 0.5, T3 = maxV * 0.75;
+  const level = v => v <= 0 ? 0 : v <= T1 ? 1 : v <= T2 ? 2 : v <= T3 ? 3 : 4;
+  const lastDate = dateList[dateList.length - 1], firstDate = dateList[0];
+  const monthsAll = []; // 기록 시작 월 ~ (오늘 또는 최신 기록) 월
+  const endDate = todayKST > lastDate ? todayKST : lastDate;
+  for (let y = +firstDate.slice(0, 4), m = +firstDate.slice(5, 7); ; ) {
+    const key = y + "-" + String(m).padStart(2, "0"); monthsAll.push(key);
+    if (key >= endDate.slice(0, 7)) break;
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  let mi = monthsAll.length - 1, selDate = null;
+  const grid = document.getElementById("calGrid");
+
+  function pick(dt) {
+    selDate = dt; draw();
+    const box = document.getElementById("calPick"); box.hidden = false;
+    const wk = DOW[wd(dt)] + "요일";
+    const day = byDate.get(dt);
+    if (!day) {
+      box.innerHTML = `<div class="t">${dt} (${wk})</div><div>기록 없음 — 사용량 0%가 아니라 <b>미기록</b>입니다.</div>`; return;
+    }
+    const ag = mergedAgents(day).slice(0, 4);
+    const prevd = dateList[dateList.indexOf(dt) - 1];
+    box.innerHTML = `<div class="t">${dt} (${wk}) · ${pct(day.total_percent)}</div>
+      <div style="color:var(--dim);font-size:12px">최고 사용일 ${pct(maxV)} 대비 ${Math.round(day.total_percent / maxV * 100)}%</div>
+      <ul>${ag.map(a => `<li><span>${a.name}</span><span class="share">${pct(a.percent)}</span></li>`).join("")}</ul>
+      <button class="go" id="calGo">이 날짜 상세 보기 ↓</button>`;
+    document.getElementById("calGo").onclick = () => {
+      dateSelect.value = dt; renderDay(dt);
+      document.getElementById("dateSelect").closest(".card").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  }
+
+  function draw() {
+    const ym = monthsAll[mi], [Y, M] = ym.split("-").map(Number);
+    document.getElementById("calTitle").textContent = Y + "년 " + M + "월";
+    document.getElementById("calPrev").disabled = mi === 0;
+    document.getElementById("calNext").disabled = mi === monthsAll.length - 1;
+    grid.innerHTML = DOW.map((n, i) => `<div class="dow${i > 4 ? " we" : ""}">${n}</div>`).join("");
+    const first = ym + "-01", dim = new Date(Date.UTC(Y, M, 0)).getUTCDate();
+    for (let i = 0; i < wd(first); i++) grid.insertAdjacentHTML("beforeend", '<div class="cell out"></div>');
+    let rec = 0, miss = 0, sum = 0;
+    for (let dd = 1; dd <= dim; dd++) {
+      const dt = ym + "-" + String(dd).padStart(2, "0");
+      const day = byDate.get(dt), isToday = dt === todayKST;
+      const el = document.createElement(day ? "button" : "div");
+      let cls = "cell";
+      if (day) { cls += " rec l" + level(day.total_percent); rec++; sum += day.total_percent;
+        el.innerHTML = `<span class="d">${dd}</span><span class="p">${day.total_percent.toFixed(1)}<small>%</small></span>`;
+        el.setAttribute("aria-label", dt + " " + pct(day.total_percent));
+        el.onclick = () => pick(dt);
+      } else if (dt > todayKST) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
+      else if (dt < firstDate) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
+      else { cls += " none"; miss++; el.innerHTML = `<span class="d">${dd}</span><span class="p">미기록</span>`;
+        el.onclick = () => pick(dt); el.style.cursor = "pointer"; }
+      if (isToday) cls += " today";
+      if (dt === selDate) cls += " sel";
+      el.className = cls; grid.appendChild(el);
+    }
+    document.getElementById("calSum").textContent =
+      "기록 " + rec + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (rec ? " · 합계 " + pct(sum) + " · 평균 " + pct(sum / rec) : "");
+  }
+  const r = v => (Math.round(v * 10) / 10).toFixed(1);
+  document.getElementById("calLegend").innerHTML =
+    `<span><i style="background:repeating-linear-gradient(135deg,rgba(143,155,184,.25) 0 4px,transparent 4px 8px);border:1px dashed var(--dim)"></i>미기록</span>` +
+    `<span><i class="l0" style="background:#1b2447;border-color:#36427a"></i>0%</span>` +
+    `<span><i style="background:#1f3a78"></i>~${r(T1)}%</span><span><i style="background:#2a5bc4"></i>~${r(T2)}%</span>` +
+    `<span><i style="background:#4b82ff"></i>~${r(T3)}%</span><span><i style="background:#9ec0ff"></i>~${r(maxV)}%</span>` +
+    `<span><i style="border:2px solid var(--warn)"></i>오늘</span>`;
+  document.getElementById("calPrev").onclick = () => { if (mi > 0) { mi--; draw(); } };
+  document.getElementById("calNext").onclick = () => { if (mi < monthsAll.length - 1) { mi++; draw(); } };
+  draw();
+})();
 
 /* ---------- 0) 상단 요약 히어로 ---------- */
 (function hero() {
