@@ -277,6 +277,20 @@
   .daynav button:disabled { opacity: .35; cursor: default; }
   #wkTable td.n, #wkTable th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   #wkTable .na { color: var(--dim); font-size: 12px; }
+
+  /* ===== v9: 접근성 ===== */
+  button:focus-visible, select:focus-visible, input:focus-visible, th.rn:focus-visible { outline: 2px solid #9ec0ff; outline-offset: 2px; }
+  .cell.rec:focus-visible { outline: 3px solid #fff; outline-offset: -2px; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+
+  /* ===== v10: 목표선 / 프로젝트 상세 / 검색 / 요약 복사 ===== */
+  .goal { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--dim); }
+  .goal input { width: 58px; background: #0b1020; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; font-family: inherit; font-size: 12px; }
+  .cell.over::after { content: ""; position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; box-shadow: 0 0 0 2px rgba(11,16,32,.55); }
+  .pj-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .pj-chips span { background: #121a38; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--dim); }
+  .pj-chips b { color: var(--text); font-weight: 700; }
+  .srch { width: 100%; max-width: 280px; background: #0b1020; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: 13px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -300,7 +314,7 @@
   <div class="pf-bar" id="pfBar">
     <label for="pfSelect">프로젝트 필터</label>
     <select id="pfSelect" aria-label="프로젝트 필터"></select>
-    <div class="st" id="pfStatus">프로젝트를 고르면 캘린더와 추이가 그 프로젝트 기준으로 바뀝니다.</div>
+    <div class="st" id="pfStatus" aria-live="polite">프로젝트를 고르면 캘린더와 추이가 그 프로젝트 기준으로 바뀝니다.</div>
     <button id="pfClear">필터 해제</button>
   </div>
   <div class="grid">
@@ -310,7 +324,8 @@
         <button class="nav" id="calPrev" aria-label="이전 달">‹</button>
         <div class="ttl" id="calTitle"></div>
         <button class="nav" id="calNext" aria-label="다음 달">›</button>
-        <div class="cal-sum" id="calSum"></div>
+        <label class="goal">목표 <input id="goalIn" type="number" min="0" max="100" step="0.5" placeholder="-" aria-label="일 목표 사용률(%)">%</label>
+        <div class="cal-sum" id="calSum" aria-live="polite"></div>
       </div>
       <div class="cal" id="calGrid"></div>
       <div class="cal-legend" id="calLegend"></div>
@@ -351,6 +366,7 @@
         <div><div class="chart-box" style="height:300px"><canvas id="pjShare"></canvas></div></div>
         <div><div class="chart-box" style="height:300px"><canvas id="pjDaily"></canvas></div></div>
       </div>
+      <input class="srch" id="pjSearch" type="search" placeholder="프로젝트 검색" aria-label="프로젝트 검색">
       <table id="pjTable">
         <thead><tr><th>프로젝트 (행을 누르면 상세)</th><th class="bar-cell"></th><th class="num">누적</th><th class="num">점유</th><th class="num hide-m">활동일</th><th class="num hide-m">마지막</th></tr></thead>
         <tbody></tbody>
@@ -383,14 +399,14 @@
     </div>
 
     <div class="card wide tab-panel" data-tab="stats">
-      <h2>인사이트 <span class="hint" style="margin:0 0 0 6px;font-weight:400">기록에서 자동으로 계산합니다</span></h2>
+      <h2>인사이트 <span class="hint" style="margin:0 0 0 6px;font-weight:400">기록에서 자동으로 계산합니다</span> <button class="btn ghost" id="copySum" style="margin-left:8px;padding:5px 10px;font-size:12px">요약 복사</button></h2>
       <div class="ins-grid" id="insGrid"></div>
       <p class="hint" id="insNote"></p>
     </div>
 
     <div class="card wide tab-panel" data-tab="stats">
       <h2>주간 요약 <span class="hint" style="margin:0 0 0 6px;font-weight:400">월~일 기준 · 기록된 날만 계산</span></h2>
-      <table id="wkTable"><thead><tr><th>주</th><th class="n">기록일</th><th class="n">일평균</th><th class="n">합계</th><th class="n">최고일</th><th class="n">전주 대비</th></tr></thead><tbody></tbody></table>
+      <table id="wkTable"><thead><tr><th>주</th><th class="n">기록일</th><th class="n">일평균</th><th class="n">합계</th><th class="n">최고일</th><th class="n">전주 대비</th><th class="n">목표 초과</th></tr></thead><tbody></tbody></table>
       <p class="hint" id="wkNote"></p>
     </div>
 
@@ -407,7 +423,7 @@
         <label>비교 기간 <input type="date" id="bFrom" aria-label="비교 기간 시작일"> ~ <input type="date" id="bTo" aria-label="비교 기간 종료일"></label>
       </div>
       <div class="cmp-ranges" id="cmpBoxes"></div>
-      <div class="cmp-verdict" id="cmpVerdict"></div>
+      <div class="cmp-verdict" id="cmpVerdict" aria-live="polite"></div>
       <h3 style="font-size:14px;margin:4px 0 8px">프로젝트별 일평균 (기록일 기준)</h3>
       <div class="chart-box" id="cmpChartBox" style="height:300px"><canvas id="cmpChart"></canvas></div>
       <table id="cmpTable" style="margin-top:14px">
@@ -820,6 +836,10 @@ function showProject(key) {
   const act = [...g.perDay.keys()].sort();
   document.getElementById("pjMeta").textContent =
     "누적 " + pct(g.total) + " · 전체의 " + (g.total / grandTotal * 100).toFixed(1) + "% · 활동 " + act.length + "일 (" + act[0].slice(5) + " ~ " + act[act.length - 1].slice(5) + ")";
+  { let pk = null; act.forEach(d => { const v = g.perDay.get(d); if (!pk || v > pk.v) pk = { d, v }; });
+    let chips = document.getElementById("pjChips");
+    if (!chips) { chips = document.createElement("div"); chips.id = "pjChips"; chips.className = "pj-chips"; document.getElementById("pjMeta").after(chips); }
+    chips.innerHTML = `<span>활동일 평균 <b>${pct(g.total / act.length)}</b></span><span>최고 <b>${pct(pk.v)}</b> (${pk.d.slice(5)})</span><span>최근 활동 <b>${act[act.length - 1].slice(5)}</b></span><span>묶인 작업 <b>${g.members.size}개</b></span>`; }
   if (pjOneChart) pjOneChart.destroy();
   pjOneChart = new Chart(document.getElementById("pjOne"), {
     type: "bar",
@@ -845,6 +865,11 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   const iso = t => new Date(t).toISOString().slice(0, 10);
   const wd = ds => (utc(ds).getUTCDay() + 6) % 7;          // 월=0 … 일=6
   let F = null;   // 프로젝트 필터 (null = 전체)
+  const goalOf = () => { try { const v = parseFloat(localStorage.getItem("usageGoal")); return isFinite(v) && v > 0 ? v : null; } catch (e) { return null; } };
+  window.__goal = goalOf;
+  { const gi = document.getElementById("goalIn"), g0 = goalOf(); if (g0 !== null) gi.value = g0;
+    gi.addEventListener("input", () => { try { if (gi.value === "" || !(parseFloat(gi.value) > 0)) localStorage.removeItem("usageGoal"); else localStorage.setItem("usageGoal", String(parseFloat(gi.value))); } catch (e) {}
+      draw(); legend(); document.dispatchEvent(new CustomEvent("goalchange")); }); }
   const valOf = day => F ? (PJ.get(F).perDay.get(day.date) || 0) : day.total_percent;
   const inPj = day => !F || PJ.get(F).perDay.has(day.date);
   let maxV = 0, T1 = 0, T2 = 0, T3 = 0;
@@ -897,14 +922,14 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     grid.innerHTML = DOW.map((n, i) => `<div class="dow${i > 4 ? " we" : ""}">${n}</div>`).join("");
     const first = ym + "-01", dim = new Date(Date.UTC(Y, M, 0)).getUTCDate();
     for (let i = 0; i < wd(first); i++) grid.insertAdjacentHTML("beforeend", '<div class="cell out"></div>');
-    let rec = 0, miss = 0, sum = 0, act = 0;
+    let rec = 0, miss = 0, sum = 0, act = 0, over = 0; const G = F ? null : goalOf();
     for (let dd = 1; dd <= dim; dd++) {
       const dt = ym + "-" + String(dd).padStart(2, "0");
       const day = byDate.get(dt), isToday = dt === todayKST;
       const el = document.createElement(day ? "button" : "div");
       let cls = "cell";
       if (day) { const v = valOf(day); rec++;
-        if (inPj(day)) { cls += " rec l" + level(v); sum += v; act++;
+        if (inPj(day)) { cls += " rec l" + level(v); sum += v; act++; if (G !== null && v > G) { cls += " over"; over++; }
           el.innerHTML = `<span class="d">${dd}</span><span class="p">${v.toFixed(1)}<small>%</small></span>`;
           el.setAttribute("aria-label", dt + " " + (F ? F + " " : "") + pct(v));
         } else { cls += " rec np";
@@ -921,7 +946,7 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     }
     document.getElementById("calSum").textContent = F
       ? "기록 " + rec + "일 중 활동 " + act + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (act ? " · 합계 " + pct(sum) + " · 활동일 평균 " + pct(sum / act) : "")
-      : "기록 " + rec + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (rec ? " · 합계 " + pct(sum) + " · 평균 " + pct(sum / rec) : "");
+      : "기록 " + rec + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (rec ? " · 합계 " + pct(sum) + " · 평균 " + pct(sum / rec) : "") + (G !== null ? " · 목표 " + pct(G) + " 초과 " + over + "일" : "");
   }
   const r = v => (Math.round(v * 10) / 10).toFixed(1);
   function legend() {
@@ -930,7 +955,8 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
       (F ? `<span><i style="border:1px dashed #36427a"></i>이 프로젝트 항목 없음</span>` : `<span><i class="l0" style="background:#1b2447;border-color:#36427a"></i>0%</span>`) +
       `<span><i style="background:#1f3a78"></i>~${r(T1)}%</span><span><i style="background:#2a5bc4"></i>~${r(T2)}%</span>` +
       `<span><i style="background:#4b82ff"></i>~${r(T3)}%</span><span><i style="background:#9ec0ff"></i>~${r(maxV)}%</span>` +
-      `<span><i style="border:2px solid var(--warn)"></i>오늘</span>`;
+      `<span><i style="border:2px solid var(--warn)"></i>오늘</span>` +
+      (!F && goalOf() !== null ? `<span><i style="background:#ff6b6b;border-radius:50%;width:9px;height:9px"></i>목표 ${pct(goalOf())} 초과</span>` : "");
   }
   legend();
   document.addEventListener("pfchange", e => {
@@ -999,6 +1025,11 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   document.getElementById("k4s").textContent = peak.date + " · 전체 기록 " + days.length + "일 중";
   spark("k4c", tail, "#ffb454");
 })();
+
+document.getElementById("pjSearch").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("#pjTable .pj-row").forEach(r => { r.style.display = !q || r.dataset.key.toLowerCase().includes(q) ? "" : "none"; });
+});
 
 /* ---------- 프로젝트 필터 (표시 단계만, 원본 data 불변) ---------- */
 (function projectFilter() {
@@ -1096,6 +1127,20 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     const newest = [...firstSeen.entries()].filter(e => e[1] > first).sort((a, b) => b[1].localeCompare(a[1]))[0];
     if (newest) cards.push({ c: "#b78cff", k: "가장 최근에 처음 나타난 프로젝트", v: newest[0], s: `${newest[1].slice(5)}에 처음 기록 (기록 시작일 ${first.slice(5)} 이후)` });
     $("insGrid").innerHTML = cards.map(c => `<div class="ins" style="--c:${c.c}"><div class="k">${c.k}</div><div class="v">${c.v}</div><div class="s">${c.s}</div></div>`).join("");
+    window.__summaryText = () => {
+      const l = days[days.length - 1], tail = days.slice(-7);
+      const lines = [`Instinct 사용량 요약 (기록 ${days.length}일, 최신 ${l.date})`,
+        `최신 ${pct(l.total_percent)} · 최근 ${tail.length}일 평균 ${pct(tail.reduce((s, d) => s + d.total_percent, 0) / tail.length)}`];
+      if (topP) lines.push(`최근 7일 1위 프로젝트: ${topP[0]} ${pct(topP[1])}`);
+      lines.push(location.origin + location.pathname);
+      return lines.join("\n");
+    };
+    $("copySum").onclick = () => {
+      const t = window.__summaryText(), b = $("copySum");
+      const done = ok => { b.textContent = ok ? "복사했습니다" : "복사 실패"; setTimeout(() => b.textContent = "요약 복사", 1800); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => done(true), () => done(false));
+      else { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); done(ok); }
+    };
     $("insNote").textContent = "기록 " + days.length + "일 기준입니다. 기록이 짧을수록 흔들리기 쉬우니 참고용으로 보세요. '기타 에이전트'는 프로젝트가 아니라 제외했습니다.";
   })();
 
@@ -1178,22 +1223,23 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
         const l = lv(v); return `<td class="c h${l}" style="background:${BG[l]}" title="${g.name} ${d} ${pct(v)}">${v >= 0.05 ? r1(v).toFixed(1) : "·"}</td>`; }).join("") + `</tr>`;
     });
     $("hmTable").innerHTML = h + "</tbody>";
-    $("hmTable").querySelectorAll("th.rn[data-k]").forEach(th => th.onclick = () => {
+    $("hmTable").querySelectorAll("th.rn[data-k]").forEach(th => { th.tabIndex = 0; th.setAttribute("role", "button"); th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); th.click(); } }; th.onclick = () => {
       window.__pf(th.dataset.k);
       if (window.matchMedia("(max-width: 760px)").matches) document.querySelector("#tabbar [data-tab=detail]").click();
       window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+    }; });
   })();
 })();
 
 /* ---------- v8: 주간 요약 ---------- */
-(function weekly() {
+function weekly() {
   if (!days.length) return;
   const parse = ds => new Date(ds + "T00:00:00Z");
   const addD = (ds, n) => { const d = parse(ds); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const mon = ds => addD(ds, -((parse(ds).getUTCDay() + 6) % 7));
+  const goal = window.__goal ? window.__goal() : null;
   const weeks = new Map();
-  days.forEach(d => { const k = mon(d.date); const w = weeks.get(k) || { k, n: 0, sum: 0, peak: null }; w.n++; w.sum += d.total_percent; if (!w.peak || d.total_percent > w.peak.total_percent) w.peak = d; weeks.set(k, w); });
+  days.forEach(d => { const k = mon(d.date); const w = weeks.get(k) || { k, n: 0, sum: 0, peak: null }; w.n++; w.sum += d.total_percent; if (goal !== null && d.total_percent > goal) w.over = (w.over || 0) + 1; if (!w.peak || d.total_percent > w.peak.total_percent) w.peak = d; weeks.set(k, w); });
   const list = [...weeks.values()].sort((a, b) => a.k.localeCompare(b.k));
   const md = ds => ds.slice(5).replace("-", "/");
   const rows = list.map((w, i) => {
@@ -1201,11 +1247,12 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     let cmp = '<span class="na">-</span>';
     if (prev) { const d = avg - prev.sum / prev.n; const lim = w.n < 3 || prev.n < 3;
       cmp = (d > 0.05 ? "+" : d < -0.05 ? "-" : "±") + Math.abs(Math.round(d * 10) / 10).toFixed(1) + "%p" + (lim ? " *" : ""); }
-    return `<tr><td>${md(w.k)} ~ ${md(addD(w.k, 6))}</td><td class="n">${w.n}일</td><td class="n"><b>${pct(avg)}</b></td><td class="n">${pct(w.sum)}</td><td class="n">${pct(w.peak.total_percent)} (${md(w.peak.date)})</td><td class="n">${cmp}</td></tr>`;
+    return `<tr><td>${md(w.k)} ~ ${md(addD(w.k, 6))}</td><td class="n">${w.n}일</td><td class="n"><b>${pct(avg)}</b></td><td class="n">${pct(w.sum)}</td><td class="n">${pct(w.peak.total_percent)} (${md(w.peak.date)})</td><td class="n">${cmp}</td><td class="n">${goal === null ? '<span class="na">-</span>' : (w.over || 0) + "일"}</td></tr>`;
   }).reverse();
   document.querySelector("#wkTable tbody").innerHTML = rows.join("");
   document.getElementById("wkNote").textContent = "* 기록일이 3일 미만인 주가 끼어 있어 참고용입니다. 기록일 수가 다른 주끼리는 합계 대신 일평균으로 비교하세요.";
-})();
+}
+weekly(); document.addEventListener("goalchange", weekly);
 
 /* ---------- 기간 비교 (기록일 기준 일평균, 표시 단계 계산만) ---------- */
 (function compare() {
