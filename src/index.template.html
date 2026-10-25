@@ -322,7 +322,7 @@
       <div class="controls">
         <select id="dateSelect" aria-label="날짜 선택"></select>
         <span class="daynav"><button id="dayPrev" aria-label="이전 기록일">‹</button><button id="dayNext" aria-label="다음 기록일">›</button></span>
-        <span class="hint">날짜를 고르면 아래 게이지·막대·표가 그날 기록으로 바뀝니다.</span>
+        <span class="hint" id="dayHint">날짜를 고르면 아래 게이지·막대·표가 그날 기록으로 바뀝니다.</span>
       </div>
       <div class="grid">
         <div>
@@ -598,9 +598,14 @@ dateSelect.addEventListener("change", () => { renderDay(dateSelect.value); syncN
 function syncNav() { const i = dateList.indexOf(dateSelect.value); document.getElementById("dayPrev").disabled = i <= 0; document.getElementById("dayNext").disabled = i < 0 || i >= dateList.length - 1; }
 document.getElementById("dayPrev").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i > 0) { dateSelect.value = dateList[i - 1]; renderDay(dateSelect.value); syncNav(); } };
 document.getElementById("dayNext").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i < dateList.length - 1) { dateSelect.value = dateList[i + 1]; renderDay(dateSelect.value); syncNav(); } };
-document.addEventListener("pfchange", () => { if (dateSelect.value) renderDay(dateSelect.value);
-syncNav(); });
+document.addEventListener("pfchange", () => {
+  if (dateSelect.value) renderDay(dateSelect.value);
+  syncNav();
+  const h = document.getElementById("dayHint");
+  h.innerHTML = window.__pfCur ? '이 영역은 <b>전체 기준</b>입니다. 필터한 프로젝트 "' + window.__pfCur + '" 행은 파란 줄로 강조됩니다.' : "날짜를 고르면 아래 게이지·막대·표가 그날 기록으로 바뀝니다.";
+});
 if (dateSelect.value) renderDay(dateSelect.value);
+syncNav();
 
 /* ---------- 2) 작업별 추이 ---------- */
 const taskTotals = new Map();
