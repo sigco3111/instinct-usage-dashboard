@@ -278,8 +278,9 @@ document.getElementById("statusBadge").textContent = meta.status === "live" ? "�
 document.getElementById("subtitle").textContent =
   (meta.unit_label || "일일 예산 대비 %") + " · 마지막 갱신 " + (meta.updated_at || "-");
 document.getElementById("footernote").innerHTML =
-  (meta.note || "") + "<br>" + (meta.status_note || "") +
-  "<br>데이터: <code>data/usage.json</code> · 새 날짜 기록이 추가되면 GitHub Actions가 이 페이지를 다시 빌드합니다.";
+  "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다." +
+  "<br>기록 방식: Instinct가 하루 한 번(밤 23시경) 그날 사용량을 <code>data/usage.json</code>에 추가합니다. 기록이 올라오면 GitHub Actions가 이 페이지를 다시 빌드·배포합니다(Actions가 사용량을 수집하는 것은 아닙니다). 아직 기록되지 않은 날은 0%가 아니라 '미기록'입니다." +
+  "<br>작업별 수치는 개별 반올림되어 하루 총계와 소수점 차이가 날 수 있습니다.";
 
 Chart.defaults.color = "#8f9bb8";
 Chart.defaults.borderColor = "rgba(39,49,86,.6)";
@@ -576,6 +577,12 @@ let pjOneChart = null, pjSel = null;
     tr.addEventListener("click", () => showProject(g.name));
     tbody.appendChild(tr);
   });
+  const dayTotals = days.reduce((x, d) => x + d.total_percent, 0), diff = grandTotal - dayTotals;
+  const trSum = document.createElement("tr");
+  trSum.innerHTML = `<td colspan="2"><strong>합계</strong> <span class="merged-tag">작업별 합 ${pct(grandTotal)} · 하루 총계의 합 ${pct(dayTotals)}` +
+    (Math.abs(diff) >= 0.05 ? ` · 차이 ${diff > 0 ? "+" : ""}${diff.toFixed(1)}%p는 작업별 반올림 때문` : "") + `</span></td>
+    <td class="num"><strong>${pct(grandTotal)}</strong></td><td class="num share">100%</td><td class="hide-m"></td><td class="hide-m"></td>`;
+  tbody.appendChild(trSum);
   document.getElementById("pjNote").textContent =
     "누적 = 기록된 날의 일일 예산 % 합계, 점유 = 작업별 누적 합(" + pct(grandTotal) + ") 대비 비율, 기록 " + days.length + "일. " +
     "이름에 같은 프로젝트명이 있는 작업만 묶고, 불분명한 작업은 따로 둡니다. 개별 작업은 반올림되어 합계와 소수점 차이가 날 수 있습니다.";
