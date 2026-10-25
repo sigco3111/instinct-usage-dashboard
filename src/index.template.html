@@ -1306,13 +1306,16 @@ weekly(); document.addEventListener("goalchange", weekly);
       total, avg: rec.length ? total / rec.length : null, peak, pj };
   }
 
-  const mondayNow = mondayOf(todayS);
+  const _m0 = mondayOf(todayS);
+  const shifted = !days.some(d => d.date >= _m0 && d.date <= addD(_m0, 6));   // 이번 주에 기록이 아직 없으면 가장 최근 기록 주를 기준으로
+  const mondayNow = shifted ? mondayOf(days[days.length - 1].date) : _m0;
+  if (shifted) document.querySelector("#cmpMode [data-m=week]").textContent = "최근 기록 주 vs 그 전 주";
   const state = { mode: "week", a: [mondayNow, addD(mondayNow, 6)], b: [addD(mondayNow, -7), addD(mondayNow, -1)], all: false };
   const minD = days[0].date, maxD = days[days.length - 1].date;
   ["aFrom", "aTo", "bFrom", "bTo"].forEach(id => { $(id).min = minD; $(id).max = addD(todayS, 6); });
   let chart = null;
 
-  function labels() { return state.mode === "week" ? ["이번 주", "지난주"] : ["기준 기간", "비교 기간"]; }
+  function labels() { return state.mode === "week" ? (shifted ? ["최근 기록 주", "그 전 주"] : ["이번 주", "지난주"]) : ["기준 기간", "비교 기간"]; }
 
   function box(S, name, color) {
     const rg = md(S.from) + " ~ " + md(S.to) + " (" + S.length + "일)";
@@ -1389,7 +1392,7 @@ weekly(); document.addEventListener("goalchange", weekly);
           tooltip: { callbacks: { label: c => " " + c.dataset.label + " " + (c.parsed.x === null ? "기록 없음" : pct(c.parsed.x)) } } },
         scales: { x: { beginAtZero: true, ticks: { callback: v => v + "%" } }, y: { ticks: { autoSkip: false } } } }
     });
-    $("cmpNote").textContent = "프로젝트 값은 그 기간의 기록일 수로 나눈 일평균입니다. 한 기간에 기록이 없는 프로젝트는 0%가 아니라 '기록 없음'으로 둡니다. 작업별 반올림 때문에 하루 총계와 소수점 차이가 날 수 있습니다.";
+    $("cmpNote").textContent = (state.mode === "week" && shifted ? "이번 주(" + md(_m0) + " 시작)에는 아직 기록이 없어 가장 최근 기록 주와 그 전 주를 비교합니다. " : "") + "프로젝트 값은 그 기간의 기록일 수로 나눈 일평균입니다. 한 기간에 기록이 없는 프로젝트는 0%가 아니라 '기록 없음'으로 둡니다. 작업별 반올림 때문에 하루 총계와 소수점 차이가 날 수 있습니다.";
   }
 
   function syncInputs() { $("aFrom").value = state.a[0]; $("aTo").value = state.a[1]; $("bFrom").value = state.b[0]; $("bTo").value = state.b[1]; }
