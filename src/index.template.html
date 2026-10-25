@@ -1065,6 +1065,7 @@ document.getElementById("pjSearch").addEventListener("input", e => {
           scales: { y: { beginAtZero: true, ticks: { callback: v => v + "%" } } } }
       });
     }
+    document.querySelectorAll("#pjTable .pj-row").forEach(r => r.classList.toggle("pf-hit", !!cur && r.dataset.key === cur));
     document.dispatchEvent(new CustomEvent("pfchange", { detail: cur }));
   }
   window.__pf = setFilter;
@@ -1350,7 +1351,7 @@ weekly(); document.addEventListener("goalchange", weekly);
       if (r.diff !== null) dd = `<span style="color:${r.diff > 0.05 ? "#ff9f6b" : r.diff < -0.05 ? "#38d39f" : "var(--dim)"}">${sgn(r.diff, "%p")}</span>`;
       else if (r.a !== null) dd = `<span class="na">${nA}만</span>`;
       else dd = `<span class="na">${nB}만</span>`;
-      return `<tr><td>${r.k}</td><td class="n">${cell(r.a)}</td><td class="n">${cell(r.b)}</td><td class="n">${dd}</td></tr>`;
+      return `<tr${window.__pfCur === r.k ? ' class="pf-hit"' : ""}><td>${r.k}</td><td class="n">${cell(r.a)}</td><td class="n">${cell(r.b)}</td><td class="n">${dd}</td></tr>`;
     }).join("") || `<tr><td colspan="4" class="na">비교할 프로젝트 기록이 없습니다.</td></tr>`;
     $("cmpMore").hidden = rows.length <= 10;
     $("cmpMore").textContent = state.all ? "상위 10개만 보기" : `전체 보기 (${rows.length}개)`;
@@ -1381,6 +1382,7 @@ weekly(); document.addEventListener("goalchange", weekly);
   [["aFrom", "a", 0], ["aTo", "a", 1], ["bFrom", "b", 0], ["bTo", "b", 1]].forEach(([id, k, i]) =>
     $(id).addEventListener("change", e => { if (e.target.value) { state[k][i] = e.target.value; render(); } }));
   $("cmpMore").addEventListener("click", () => { state.all = !state.all; render(); });
+  document.addEventListener("pfchange", render);
   syncInputs(); render();
 })();
 
