@@ -290,11 +290,25 @@ function renderDay(dt) {
   document.getElementById("gaugePct").textContent = pct(day.total_percent);
   document.getElementById("gaugeDate").textContent = dt;
   if (gaugeChart) gaugeChart.destroy();
+  const gmax = Math.max(10, Math.ceil(Math.max(...days.map(d => d.total_percent)) / 5) * 5);
+  const avgAll = days.reduce((a, d) => a + d.total_percent, 0) / (days.length || 1);
+  const col = day.total_percent >= avgAll * 1.5 ? "#ffb454" : "#5b8cff";
+  document.getElementById("gaugeScale").textContent =
+    "눈금 0–" + gmax + "% (전체 100% 중 확대) · 흰 선 = 기록 평균 " + pct(avgAll);
   gaugeChart = new Chart(document.getElementById("gauge"), {
     type: "doughnut",
-    data: { datasets: [{ data: [day.total_percent, Math.max(0, 100 - day.total_percent)],
-      backgroundColor: ["#5b8cff", "#1a2342"], borderWidth: 0, circumference: 270, rotation: 225 }] },
-    options: { cutout: "74%", plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    data: { datasets: [{ data: [Math.min(day.total_percent, gmax), Math.max(0, gmax - day.total_percent)],
+      backgroundColor: [col, "#222d57"], borderWidth: 0, circumference: 270, rotation: 225 }] },
+    options: { cutout: "74%", maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } },
+    plugins: [{ id: "avgTick", afterDraw(ch) {
+      const arc = ch.getDatasetMeta(0).data[0]; if (!arc) return;
+      const ang = (225 + 270 * Math.min(avgAll / gmax, 1)) * Math.PI / 180;
+      const c = ch.ctx; c.save(); c.strokeStyle = "#fff"; c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(arc.x + Math.cos(ang) * (arc.innerRadius - 2), arc.y + Math.sin(ang) * (arc.innerRadius - 2));
+      c.lineTo(arc.x + Math.cos(ang) * (arc.outerRadius + 2), arc.y + Math.sin(ang) * (arc.outerRadius + 2));
+      c.stroke(); c.restore();
+    } }]
   });
 
   if (agentChart) agentChart.destroy();
