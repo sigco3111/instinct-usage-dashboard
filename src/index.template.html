@@ -302,7 +302,7 @@ function renderDay(dt) {
     options: { cutout: "74%", maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } },
     plugins: [{ id: "avgTick", afterDraw(ch) {
       const arc = ch.getDatasetMeta(0).data[0]; if (!arc) return;
-      const ang = (225 + 270 * Math.min(avgAll / gmax, 1)) * Math.PI / 180;
+      const ang = arc.startAngle + (270 * Math.PI / 180) * Math.min(avgAll / gmax, 1);
       const c = ch.ctx; c.save(); c.strokeStyle = "#fff"; c.lineWidth = 2;
       c.beginPath();
       c.moveTo(arc.x + Math.cos(ang) * (arc.innerRadius - 2), arc.y + Math.sin(ang) * (arc.innerRadius - 2));
