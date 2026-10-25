@@ -223,6 +223,46 @@
   #cmpTable td.n, #cmpTable th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   #cmpTable .na { color: var(--dim); font-size: 12px; }
   @media (max-width: 760px) { .cmp-ranges { grid-template-columns: 1fr; } .cmp-box .big { font-size: 24px; } }
+
+  /* ===== v6: 프로젝트 필터 ===== */
+  .pf-bar { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; background: #0d1430; border: 1px solid var(--line);
+    border-radius: 14px; padding: 10px 12px; margin-bottom: 14px; position: sticky; top: 6px; z-index: 6; }
+  .pf-bar.on { border-color: var(--accent); background: #101c42; box-shadow: 0 0 0 1px rgba(91,140,255,.35) inset; }
+  .pf-bar label { font-size: 13px; font-weight: 700; }
+  .pf-bar select { background: #0b1020; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; font-family: inherit; font-size: 13px; max-width: 100%; }
+  .pf-bar .st { font-size: 12px; color: var(--dim); flex: 1 1 220px; line-height: 1.5; }
+  .pf-bar .st b { color: var(--text); }
+  .pf-bar button { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 7px 12px; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .pf-bar:not(.on) button { display: none; }
+  .pf-off { display: none !important; }
+  .tag-pf { display: inline-block; margin-left: 8px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; vertical-align: 2px; }
+  .cell.np { background: transparent; border: 1px dashed #36427a; color: var(--dim); }
+  .cell.np .p { font-size: 13px; font-weight: 600; opacity: .7; }
+  @media (max-width: 760px) { .pf-bar { top: 0; } }
+
+  /* ===== v7: 인사이트 / 요일 / 점검 / 내보내기 / 히트맵 ===== */
+  .ins-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .ins { background: #0d1430; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; border-left: 3px solid var(--c, var(--accent)); }
+  .ins .k { font-size: 12px; color: var(--dim); }
+  .ins .v { font-size: 17px; font-weight: 800; margin: 3px 0; line-height: 1.3; }
+  .ins .s { font-size: 12px; color: var(--dim); line-height: 1.5; }
+  .qc-sum { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  .qc-sum .b { background: #0d1430; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 12px; color: var(--dim); }
+  .qc-sum .b b { display: block; font-size: 16px; color: var(--text); margin-top: 2px; }
+  .qc-ok { color: #38d39f; } .qc-warn { color: var(--warn); } .qc-bad { color: var(--bad); }
+  #qcTable td.n, #qcTable th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hm-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.hm { border-collapse: separate; border-spacing: 3px; width: auto; min-width: 100%; font-size: 12px; }
+  table.hm th, table.hm td { border: 0; padding: 0; }
+  table.hm th.rn { text-align: left; font-weight: 600; padding-right: 8px; white-space: nowrap; position: sticky; left: 0; background: var(--panel); z-index: 1; max-width: 170px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  table.hm th.rn:hover { color: var(--accent); }
+  table.hm th.cn { font-weight: 400; color: var(--dim); font-size: 10.5px; padding-bottom: 3px; }
+  table.hm td.c { min-width: 30px; height: 26px; border-radius: 6px; text-align: center; font-size: 10px; color: rgba(255,255,255,.85); background: #121a38; }
+  table.hm td.c.h4 { color: #0b1020; }
+  .exp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--dim); }
+  .exp-row input { background: #0b1020; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; font-family: inherit; }
+  .btn { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn.ghost { background: #0d1430; color: var(--text); border: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -243,9 +283,15 @@
     </div>
   </section>
 
+  <div class="pf-bar" id="pfBar">
+    <label for="pfSelect">프로젝트 필터</label>
+    <select id="pfSelect" aria-label="프로젝트 필터"></select>
+    <div class="st" id="pfStatus">프로젝트를 고르면 캘린더와 추이가 그 프로젝트 기준으로 바뀝니다.</div>
+    <button id="pfClear">필터 해제</button>
+  </div>
   <div class="grid">
     <div class="card wide tab-panel active" data-tab="detail">
-      <h2>활동 캘린더 <span class="hint" style="margin:0 0 0 6px;font-weight:400">날짜를 누르면 그날 작업을 볼 수 있습니다</span></h2>
+      <h2>활동 캘린더<span class="tag-pf pf-off" id="calTag"></span> <span class="hint" style="margin:0 0 0 6px;font-weight:400">날짜를 누르면 그날 작업을 볼 수 있습니다</span></h2>
       <div class="cal-head">
         <button class="nav" id="calPrev" aria-label="이전 달">‹</button>
         <div class="ttl" id="calTitle"></div>
@@ -296,16 +342,35 @@
       </table>
       <div class="pj-detail" id="pjDetail" hidden>
         <h3 id="pjName"></h3><div class="meta" id="pjMeta"></div>
+        <button class="cmp-more" id="pjFilterBtn" style="margin:0 0 10px">이 프로젝트만 보기 (캘린더·추이)</button>
         <div class="chart-box" style="height:190px"><canvas id="pjOne"></canvas></div>
         <ul id="pjMembers"></ul>
       </div>
       <p class="hint" id="pjNote"></p>
     </div>
 
+    <div class="card wide tab-panel" data-tab="projects">
+      <h2>프로젝트 × 날짜 <span class="hint" style="margin:0 0 0 6px;font-weight:400">칸 색이 진할수록 그날 많이 썼습니다 · 이름을 누르면 필터</span></h2>
+      <div class="hm-wrap"><table class="hm" id="hmTable"></table></div>
+      <p class="hint">빈 칸은 그날 이 프로젝트 항목이 기록에 없다는 뜻입니다(0%로 단정하지 않습니다). 색 농도는 칸의 최댓값 기준입니다.</p>
+    </div>
+
+    <div class="card wide tab-panel pf-off" data-tab="trend" id="pfTrendCard">
+      <h2 id="pfTrendTitle">프로젝트 추이</h2>
+      <div class="chart-box" style="height:260px"><canvas id="pfTrend"></canvas></div>
+      <p class="hint">막대는 이 프로젝트의 일별 사용량, 선은 그날 전체 사용량(비교용)입니다. 이 프로젝트 항목이 없는 날은 0%가 아니라 비워 둡니다.</p>
+    </div>
+
     <div class="card wide tab-panel" data-tab="trend">
       <h2>작업별 추이</h2>
       <div class="chart-box" style="height:300px"><canvas id="taskTrendChart"></canvas></div>
       <p class="hint">이름 뒤의 회차 표기(예: “… 설계”, “… 설계 2”)는 같은 작업으로 합쳐서 그립니다. 범례를 누르면 선을 켜고 끌 수 있습니다. 굵은 파란 선은 하루 총 사용률입니다.</p>
+    </div>
+
+    <div class="card wide tab-panel" data-tab="stats">
+      <h2>인사이트 <span class="hint" style="margin:0 0 0 6px;font-weight:400">기록에서 자동으로 계산합니다</span></h2>
+      <div class="ins-grid" id="insGrid"></div>
+      <p class="hint" id="insNote"></p>
     </div>
 
     <div class="card wide tab-panel" data-tab="stats">
@@ -330,6 +395,26 @@
       </table>
       <button class="cmp-more" id="cmpMore" hidden>전체 보기</button>
       <p class="hint" id="cmpNote"></p>
+    </div>
+
+    <div class="card wide tab-panel" data-tab="stats">
+      <h2>요일별 패턴 <span class="hint" style="margin:0 0 0 6px;font-weight:400">요일마다 기록된 날의 평균</span></h2>
+      <div class="chart-box" style="height:240px"><canvas id="dowChart"></canvas></div>
+      <p class="hint" id="dowNote"></p>
+    </div>
+
+    <div class="card wide tab-panel" data-tab="stats">
+      <h2>기록 점검</h2>
+      <div class="qc-sum" id="qcSum"></div>
+      <table id="qcTable"><thead><tr><th>날짜</th><th class="n">하루 총계</th><th class="n">작업 합계</th><th class="n">차이</th><th>판정</th></tr></thead><tbody></tbody></table>
+      <p class="hint" id="qcNote"></p>
+    </div>
+
+    <div class="card wide tab-panel" data-tab="stats">
+      <h2>CSV 내보내기</h2>
+      <div class="exp-row">기간 <input type="date" id="exFrom" aria-label="내보내기 시작일"> ~ <input type="date" id="exTo" aria-label="내보내기 종료일">
+        <button class="btn" id="exDaily">일별 CSV</button><button class="btn ghost" id="exProject">프로젝트별 CSV</button></div>
+      <p class="hint" id="exNote"></p>
     </div>
 
     <div class="card wide tab-panel" data-tab="stats">
@@ -727,8 +812,12 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   const utc = ds => new Date(ds + "T00:00:00Z");
   const iso = t => new Date(t).toISOString().slice(0, 10);
   const wd = ds => (utc(ds).getUTCDay() + 6) % 7;          // 월=0 … 일=6
-  const maxV = Math.max(...days.map(d => d.total_percent));
-  const T1 = maxV * 0.25, T2 = maxV * 0.5, T3 = maxV * 0.75;
+  let F = null;   // 프로젝트 필터 (null = 전체)
+  const valOf = day => F ? (PJ.get(F).perDay.get(day.date) || 0) : day.total_percent;
+  const inPj = day => !F || PJ.get(F).perDay.has(day.date);
+  let maxV = 0, T1 = 0, T2 = 0, T3 = 0;
+  function setScale() { maxV = Math.max(0.1, ...days.map(valOf)); T1 = maxV * 0.25; T2 = maxV * 0.5; T3 = maxV * 0.75; }
+  setScale();
   const level = v => v <= 0 ? 0 : v <= T1 ? 1 : v <= T2 ? 2 : v <= T3 ? 3 : 4;
   const lastDate = dateList[dateList.length - 1], firstDate = dateList[0];
   const monthsAll = []; // 기록 시작 월 ~ (오늘 또는 최신 기록) 월
@@ -749,12 +838,19 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     if (!day) {
       box.innerHTML = `<div class="t">${dt} (${wk})</div><div>기록 없음 — 사용량 0%가 아니라 <b>미기록</b>입니다.</div>`; return;
     }
-    const ag = mergedAgents(day).slice(0, 4);
-    const prevd = dateList[dateList.indexOf(dt) - 1];
-    box.innerHTML = `<div class="t">${dt} (${wk}) · ${pct(day.total_percent)}</div>
-      <div style="color:var(--dim);font-size:12px">최고 사용일 ${pct(maxV)} 대비 ${Math.round(day.total_percent / maxV * 100)}%</div>
-      <ul>${ag.map(a => `<li><span>${a.name}</span><span class="share">${pct(a.percent)}</span></li>`).join("")}</ul>
-      <button class="go" id="calGo">이 날짜 상세 보기 ↓</button>`;
+    let list = mergedAgents(day);
+    if (F) list = list.filter(a => projectOf(a.name).key === F);
+    list = list.slice(0, 4);
+    const v = valOf(day);
+    if (F && !inPj(day)) {
+      box.innerHTML = `<div class="t">${dt} (${wk}) · ${F}</div><div style="color:var(--dim)">이 날은 "${F}" 항목이 기록에 없습니다. 그날 전체 사용량은 ${pct(day.total_percent)}입니다.</div>
+        <button class="go" id="calGo">이 날짜 상세 보기 ↓</button>`;
+    } else {
+      box.innerHTML = `<div class="t">${dt} (${wk}) · ${F ? F + " " : ""}${pct(v)}</div>
+        <div style="color:var(--dim);font-size:12px">${F ? "그날 전체 " + pct(day.total_percent) + " 중 " + Math.round(v / (day.total_percent || 1) * 100) + "% · " : ""}${F ? "이 프로젝트 최고일" : "최고 사용일"} ${pct(maxV)} 대비 ${Math.round(v / maxV * 100)}%</div>
+        <ul>${list.map(a => `<li><span>${a.name}</span><span class="share">${pct(a.percent)}</span></li>`).join("")}</ul>
+        <button class="go" id="calGo">이 날짜 상세 보기 ↓</button>`;
+    }
     document.getElementById("calGo").onclick = () => {
       dateSelect.value = dt; renderDay(dt);
       document.getElementById("dateSelect").closest(".card").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -769,15 +865,19 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     grid.innerHTML = DOW.map((n, i) => `<div class="dow${i > 4 ? " we" : ""}">${n}</div>`).join("");
     const first = ym + "-01", dim = new Date(Date.UTC(Y, M, 0)).getUTCDate();
     for (let i = 0; i < wd(first); i++) grid.insertAdjacentHTML("beforeend", '<div class="cell out"></div>');
-    let rec = 0, miss = 0, sum = 0;
+    let rec = 0, miss = 0, sum = 0, act = 0;
     for (let dd = 1; dd <= dim; dd++) {
       const dt = ym + "-" + String(dd).padStart(2, "0");
       const day = byDate.get(dt), isToday = dt === todayKST;
       const el = document.createElement(day ? "button" : "div");
       let cls = "cell";
-      if (day) { cls += " rec l" + level(day.total_percent); rec++; sum += day.total_percent;
-        el.innerHTML = `<span class="d">${dd}</span><span class="p">${day.total_percent.toFixed(1)}<small>%</small></span>`;
-        el.setAttribute("aria-label", dt + " " + pct(day.total_percent));
+      if (day) { const v = valOf(day); rec++;
+        if (inPj(day)) { cls += " rec l" + level(v); sum += v; act++;
+          el.innerHTML = `<span class="d">${dd}</span><span class="p">${v.toFixed(1)}<small>%</small></span>`;
+          el.setAttribute("aria-label", dt + " " + (F ? F + " " : "") + pct(v));
+        } else { cls += " rec np";
+          el.innerHTML = `<span class="d">${dd}</span><span class="p">-</span>`;
+          el.setAttribute("aria-label", dt + " " + F + " 항목 없음"); }
         el.onclick = () => pick(dt);
       } else if (dt > todayKST) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
       else if (dt < firstDate) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
@@ -787,16 +887,26 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
       if (dt === selDate) cls += " sel";
       el.className = cls; grid.appendChild(el);
     }
-    document.getElementById("calSum").textContent =
-      "기록 " + rec + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (rec ? " · 합계 " + pct(sum) + " · 평균 " + pct(sum / rec) : "");
+    document.getElementById("calSum").textContent = F
+      ? "기록 " + rec + "일 중 활동 " + act + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (act ? " · 합계 " + pct(sum) + " · 활동일 평균 " + pct(sum / act) : "")
+      : "기록 " + rec + "일" + (miss ? " · 미기록 " + miss + "일" : "") + (rec ? " · 합계 " + pct(sum) + " · 평균 " + pct(sum / rec) : "");
   }
   const r = v => (Math.round(v * 10) / 10).toFixed(1);
-  document.getElementById("calLegend").innerHTML =
-    `<span><i style="background:repeating-linear-gradient(135deg,rgba(143,155,184,.25) 0 4px,transparent 4px 8px);border:1px dashed var(--dim)"></i>미기록</span>` +
-    `<span><i class="l0" style="background:#1b2447;border-color:#36427a"></i>0%</span>` +
-    `<span><i style="background:#1f3a78"></i>~${r(T1)}%</span><span><i style="background:#2a5bc4"></i>~${r(T2)}%</span>` +
-    `<span><i style="background:#4b82ff"></i>~${r(T3)}%</span><span><i style="background:#9ec0ff"></i>~${r(maxV)}%</span>` +
-    `<span><i style="border:2px solid var(--warn)"></i>오늘</span>`;
+  function legend() {
+    document.getElementById("calLegend").innerHTML =
+      `<span><i style="background:repeating-linear-gradient(135deg,rgba(143,155,184,.25) 0 4px,transparent 4px 8px);border:1px dashed var(--dim)"></i>미기록</span>` +
+      (F ? `<span><i style="border:1px dashed #36427a"></i>이 프로젝트 항목 없음</span>` : `<span><i class="l0" style="background:#1b2447;border-color:#36427a"></i>0%</span>`) +
+      `<span><i style="background:#1f3a78"></i>~${r(T1)}%</span><span><i style="background:#2a5bc4"></i>~${r(T2)}%</span>` +
+      `<span><i style="background:#4b82ff"></i>~${r(T3)}%</span><span><i style="background:#9ec0ff"></i>~${r(maxV)}%</span>` +
+      `<span><i style="border:2px solid var(--warn)"></i>오늘</span>`;
+  }
+  legend();
+  document.addEventListener("pfchange", e => {
+    F = e.detail; setScale(); legend();
+    const tag = document.getElementById("calTag");
+    tag.textContent = F ? "필터: " + F : ""; tag.classList.toggle("pf-off", !F);
+    document.getElementById("calPick").hidden = true; selDate = null; draw();
+  });
   document.getElementById("calPrev").onclick = () => { if (mi > 0) { mi--; draw(); } };
   document.getElementById("calNext").onclick = () => { if (mi < monthsAll.length - 1) { mi++; draw(); } };
   draw();
@@ -856,6 +966,190 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   document.getElementById("k4v").innerHTML = pct(peak.total_percent).replace("%", "<small>%</small>");
   document.getElementById("k4s").textContent = peak.date + " · 전체 기록 " + days.length + "일 중";
   spark("k4c", tail, "#ffb454");
+})();
+
+/* ---------- 프로젝트 필터 (표시 단계만, 원본 data 불변) ---------- */
+(function projectFilter() {
+  const sel = document.getElementById("pfSelect"), bar = document.getElementById("pfBar");
+  const opts = pjList.filter(g => g.name !== "기타 에이전트");
+  sel.innerHTML = `<option value="">전체 (필터 없음)</option>` + opts.map(g => `<option value="${g.name}">${g.name} · 누적 ${pct(g.total)}</option>`).join("");
+  let cur = null, tChart = null;
+  function setFilter(k) {
+    cur = k && PJ.has(k) ? k : null;
+    sel.value = cur || "";
+    bar.classList.toggle("on", !!cur);
+    const st = document.getElementById("pfStatus");
+    const card = document.getElementById("pfTrendCard");
+    if (!cur) {
+      st.textContent = "프로젝트를 고르면 캘린더와 추이가 그 프로젝트 기준으로 바뀝니다.";
+      card.classList.add("pf-off"); if (tChart) { tChart.destroy(); tChart = null; }
+    } else {
+      const g = PJ.get(cur), n = g.perDay.size;
+      st.innerHTML = `<b>${cur}</b> 기준으로 보는 중 · 활동 ${n}일 / 기록 ${days.length}일 · 누적 ${pct(g.total)} (전체의 ${(g.total / grandTotal * 100).toFixed(1)}%)<br>맨 위 요약 카드와 날짜별 상세는 전체 기준입니다.`;
+      card.classList.remove("pf-off");
+      document.getElementById("pfTrendTitle").textContent = "프로젝트 추이 · " + cur;
+      if (tChart) tChart.destroy();
+      tChart = new Chart(document.getElementById("pfTrend"), {
+        data: { labels: dateList.map(d => d.slice(5)), datasets: [
+          { type: "bar", label: cur, order: 2, backgroundColor: "#5b8cff", borderRadius: 4,
+            data: dateList.map(dt => g.perDay.has(dt) ? Math.round(g.perDay.get(dt) * 10) / 10 : null) },
+          { type: "line", label: "그날 전체", order: 1, borderColor: "#8f9bb8", borderDash: [5, 4], pointRadius: 2, tension: .25,
+            data: dateList.map(dt => byDate.get(dt).total_percent) } ] },
+        options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } },
+            tooltip: { callbacks: { label: c => " " + c.dataset.label + ": " + (c.parsed.y === null ? "항목 없음" : pct(c.parsed.y)) } } },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => v + "%" } } } }
+      });
+    }
+    document.dispatchEvent(new CustomEvent("pfchange", { detail: cur }));
+  }
+  window.__pf = setFilter;
+  sel.addEventListener("change", () => setFilter(sel.value || null));
+  document.getElementById("pfClear").addEventListener("click", () => setFilter(null));
+  document.getElementById("pjFilterBtn").addEventListener("click", () => {
+    setFilter(document.getElementById("pjName").textContent);
+    const mq = window.matchMedia("(max-width: 760px)");
+    if (mq.matches) document.querySelector("#tabbar [data-tab=detail]").click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+
+/* ---------- v7: 인사이트 · 요일 · 점검 · 내보내기 · 히트맵 (표시 단계만) ---------- */
+(function extras() {
+  if (!days.length) return;
+  const $ = id => document.getElementById(id);
+  const todayS = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const parse = ds => new Date(ds + "T00:00:00Z");
+  const addD = (ds, n) => { const d = parse(ds); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+  const DOWN = ["월", "화", "수", "목", "금", "토", "일"];
+  const wd = ds => (parse(ds).getUTCDay() + 6) % 7;
+  const r1 = v => Math.round(v * 10) / 10;
+  const first = dateList[0], last = dateList[dateList.length - 1];
+  const taskSum = d => (d.agents || []).reduce((a, x) => a + x.percent, 0);
+
+  /* 인사이트 */
+  (function insights() {
+    const cards = [];
+    // 최근 7일(달력 기준 마지막 기록일 포함) 프로젝트 1위
+    const from7 = addD(last, -6), recent = days.filter(d => d.date >= from7);
+    const pj = new Map();
+    recent.forEach(d => (d.agents || []).forEach(a => { const g = projectOf(a.name); if (g.key === "기타 에이전트" || g.key === "메인 에이전트") return; pj.set(g.key, (pj.get(g.key) || 0) + a.percent); }));
+    const topP = [...pj.entries()].sort((a, b) => b[1] - a[1])[0];
+    const recSum = recent.reduce((s, d) => s + taskSum(d), 0);
+    if (topP) cards.push({ c: "#5b8cff", k: `최근 7일(${from7.slice(5)}~${last.slice(5)}) 가장 많이 쓴 프로젝트`, v: topP[0],
+      s: `${pct(topP[1])} · 같은 기간 작업 합계의 ${Math.round(topP[1] / (recSum || 1) * 100)}% · 기록 ${recent.length}일` });
+    // 요일
+    const by = Array.from({ length: 7 }, () => ({ s: 0, n: 0 }));
+    days.forEach(d => { const w = wd(d.date); by[w].s += d.total_percent; by[w].n++; });
+    const cand = by.map((x, i) => ({ i, n: x.n, avg: x.n ? x.s / x.n : -1 })).filter(x => x.n).sort((a, b) => b.avg - a.avg)[0];
+    if (cand) cards.push({ c: "#ffb454", k: "평균이 가장 높은 요일", v: DOWN[cand.i] + "요일 " + pct(cand.avg),
+      s: `해당 요일 기록 ${cand.n}일 기준` + (cand.n < 3 ? " · 표본이 적어 참고용" : "") });
+    // 연속 기록
+    let streak = 1; for (let i = dateList.length - 1; i > 0; i--) { if (diffDays(dateList[i - 1], dateList[i]) === 1) streak++; else break; }
+    cards.push({ c: "#38d39f", k: "연속 기록", v: streak + "일", s: `${addD(last, -(streak - 1)).slice(5)} ~ ${last.slice(5)}` });
+    // 최근 3일 vs 직전 3일 (기록일 기준)
+    if (days.length >= 6) {
+      const a = days.slice(-3), b = days.slice(-6, -3);
+      const am = a.reduce((s, d) => s + d.total_percent, 0) / 3, bm = b.reduce((s, d) => s + d.total_percent, 0) / 3;
+      const dlt = am - bm;
+      cards.push({ c: dlt > 0 ? "#ff9f6b" : "#38d39f", k: "최근 3일 vs 직전 3일 (기록일 평균)", v: (dlt >= 0 ? "+" : "-") + Math.abs(r1(dlt)).toFixed(1) + "%p",
+        s: `${a[0].date.slice(5)}~${a[2].date.slice(5)} ${pct(am)} · ${b[0].date.slice(5)}~${b[2].date.slice(5)} ${pct(bm)}` });
+    }
+    // 가장 새로 등장한 프로젝트
+    const firstSeen = new Map();
+    days.forEach(d => (d.agents || []).forEach(a => { const g = projectOf(a.name).key; if (g !== "기타 에이전트" && g !== "메인 에이전트" && !firstSeen.has(g)) firstSeen.set(g, d.date); }));
+    const newest = [...firstSeen.entries()].filter(e => e[1] > first).sort((a, b) => b[1].localeCompare(a[1]))[0];
+    if (newest) cards.push({ c: "#b78cff", k: "가장 최근에 처음 나타난 프로젝트", v: newest[0], s: `${newest[1].slice(5)}에 처음 기록 (기록 시작일 ${first.slice(5)} 이후)` });
+    $("insGrid").innerHTML = cards.map(c => `<div class="ins" style="--c:${c.c}"><div class="k">${c.k}</div><div class="v">${c.v}</div><div class="s">${c.s}</div></div>`).join("");
+    $("insNote").textContent = "기록 " + days.length + "일 기준입니다. 기록이 짧을수록 흔들리기 쉬우니 참고용으로 보세요. '기타 에이전트'는 프로젝트가 아니라 제외했습니다.";
+  })();
+
+  /* 요일별 패턴 */
+  (function dow() {
+    const by = Array.from({ length: 7 }, () => ({ s: 0, n: 0 }));
+    days.forEach(d => { const w = wd(d.date); by[w].s += d.total_percent; by[w].n++; });
+    new Chart($("dowChart"), { type: "bar",
+      data: { labels: DOWN.map((n, i) => `${n} (${by[i].n}일)`), datasets: [{ data: by.map(x => x.n ? r1(x.s / x.n) : null),
+        backgroundColor: DOWN.map((_, i) => i > 4 ? "#ff8fb3" : "#5b8cff"), borderRadius: 5 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => c.parsed.y === null ? " 기록 없음" : " 평균 " + pct(c.parsed.y) } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => v + "%" } } } } });
+    const few = by.filter(x => x.n > 0 && x.n < 3).length, none = by.filter(x => !x.n).length;
+    $("dowNote").textContent = "괄호는 그 요일의 기록일 수입니다. 기록이 없는 요일은 비워 두고, 기록일이 3일 미만인 요일 " + few + "개는 참고용입니다" + (none ? " (기록이 아직 없는 요일 " + none + "개)" : "") + ".";
+  })();
+
+  /* 기록 점검 */
+  (function qc() {
+    const TOL = n => 0.05 * (n + 1) + 1e-6;
+    const rows = days.map(d => { const ts = taskSum(d), df = ts - d.total_percent, n = (d.agents || []).length;
+      const ad = Math.abs(df); const st = ad < 0.05 ? "일치" : ad <= TOL(n) ? "반올림 범위" : "확인 필요"; return { d, ts, df, n, st }; });
+    const bad = rows.filter(x => x.st === "확인 필요").length, rnd = rows.filter(x => x.st === "반올림 범위").length;
+    // 미기록일 (기록 시작일 이후, 오늘 이전은 미기록, 오늘은 대기)
+    const miss = []; let pending = false;
+    for (let d = first; d <= todayS; d = addD(d, 1)) { if (!byDate.has(d)) { if (d === todayS) pending = true; else miss.push(d); } }
+    const upd = meta.updated_at ? new Date(meta.updated_at) : null;
+    const fmt = t => { const k = new Date(t.getTime() + 9 * 3600e3).toISOString(); return k.slice(0, 10) + " " + k.slice(11, 16) + " KST"; };
+    const parts = [
+      ["최신 기록일", last, last === todayS ? "qc-ok" : ""],
+      ["마지막 갱신", upd && !isNaN(upd) ? fmt(upd) : "-", ""],
+      ["기록일 수", days.length + "일", ""],
+      ["빠진 날", miss.length ? miss.length + "일 (" + miss.map(x => x.slice(5)).join(", ") + ")" : "없음", miss.length ? "qc-warn" : "qc-ok"],
+      ["합계 불일치", bad ? bad + "일 확인 필요" : "확인 필요 0건", bad ? "qc-bad" : "qc-ok"],
+    ];
+    if (pending) parts.splice(3, 0, ["오늘(" + todayS.slice(5) + ")", "기록 전 (밤에 기록)", ""]);
+    $("qcSum").innerHTML = parts.map(p => `<div class="b">${p[0]}<b class="${p[2]}">${p[1]}</b></div>`).join("");
+    $("qcTable").querySelector("tbody").innerHTML = rows.slice().reverse().map(x =>
+      `<tr><td>${x.d.date}</td><td class="n">${x.d.total_percent.toFixed(1)}%</td><td class="n">${x.ts.toFixed(1)}%</td><td class="n">${Math.abs(x.df) < 0.05 ? "0.0" : (x.df >= 0 ? "+" : "-") + Math.abs(x.df).toFixed(1)}</td>` +
+      `<td class="${x.st === "일치" ? "qc-ok" : x.st === "확인 필요" ? "qc-bad" : "qc-warn"}">${x.st}</td></tr>`).join("");
+    $("qcNote").textContent = "작업별 수치는 0.1% 단위로 따로 반올림되어 하루 총계와 최대 (작업 수+1)×0.05%p까지 다를 수 있습니다. 이 범위 안이면 '반올림 범위', 넘으면 '확인 필요'로 표시합니다 (반올림 범위 " + rnd + "일).";
+  })();
+
+  /* CSV 내보내기 */
+  (function exp() {
+    $("exFrom").value = first; $("exTo").value = last; $("exFrom").min = first; $("exTo").max = last;
+    const range = () => { const f = $("exFrom").value || first, t = $("exTo").value || last; return days.filter(d => d.date >= f && d.date <= t); };
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    function dl(name, text) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/csv;charset=utf-8" })); a.download = name;
+      document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    }
+    const stamp = rs => rs[0].date.replace(/-/g, "") + "-" + rs[rs.length - 1].date.replace(/-/g, "");
+    $("exDaily").onclick = () => {
+      const rs = range(); if (!rs.length) { $("exNote").textContent = "선택한 기간에 기록된 날이 없습니다."; return; }
+      const lines = ["date,total_percent,task_sum_percent"].concat(rs.map(d => [d.date, d.total_percent.toFixed(1), taskSum(d).toFixed(1)].join(",")));
+      dl("usage-daily-" + stamp(rs) + ".csv", lines.join("\n") + "\n"); $("exNote").textContent = "일별 " + rs.length + "행을 내려받았습니다.";
+    };
+    $("exProject").onclick = () => {
+      const rs = range(); if (!rs.length) { $("exNote").textContent = "선택한 기간에 기록된 날이 없습니다."; return; }
+      const lines = ["date,project,percent"]; let n = 0;
+      rs.forEach(d => { const m = new Map(); (d.agents || []).forEach(a => { const k = projectOf(a.name).key; m.set(k, (m.get(k) || 0) + a.percent); });
+        [...m.entries()].sort((a, b) => b[1] - a[1]).forEach(([k, v]) => { lines.push([d.date, q(k), v.toFixed(1)].join(",")); n++; }); });
+      dl("usage-project-" + stamp(rs) + ".csv", lines.join("\n") + "\n"); $("exNote").textContent = "프로젝트별 " + n + "행을 내려받았습니다.";
+    };
+    $("exNote").textContent = "화면에 보이는 이름 규칙(프로젝트 묶음, 기타 에이전트)과 같은 값만 내보냅니다. 미기록 날짜는 행이 없습니다.";
+  })();
+
+  /* 프로젝트 × 날짜 히트맵 */
+  (function heat() {
+    const list = pjList.filter(g => g.name !== "기타 에이전트").slice(0, 14);
+    const mx = Math.max(0.1, ...list.flatMap(g => [...g.perDay.values()]));
+    const lv = v => v <= mx * .25 ? 1 : v <= mx * .5 ? 2 : v <= mx * .75 ? 3 : 4;
+    const BG = ["#121a38", "#1f3a78", "#2a5bc4", "#4b82ff", "#9ec0ff"];
+    let h = `<thead><tr><th class="rn"></th>${dateList.map(d => `<th class="cn">${d.slice(5).replace("-", "/")}</th>`).join("")}</tr></thead><tbody>`;
+    list.forEach(g => {
+      h += `<tr><th class="rn" data-k="${g.name}" title="${g.name} 필터">${g.name}</th>` + dateList.map(d => {
+        const v = g.perDay.get(d); if (v === undefined) return `<td class="c"></td>`;
+        const l = lv(v); return `<td class="c h${l}" style="background:${BG[l]}" title="${g.name} ${d} ${pct(v)}">${v >= 0.05 ? r1(v).toFixed(1) : "·"}</td>`; }).join("") + `</tr>`;
+    });
+    $("hmTable").innerHTML = h + "</tbody>";
+    $("hmTable").querySelectorAll("th.rn[data-k]").forEach(th => th.onclick = () => {
+      window.__pf(th.dataset.k);
+      if (window.matchMedia("(max-width: 760px)").matches) document.querySelector("#tabbar [data-tab=detail]").click();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  })();
 })();
 
 /* ---------- 기간 비교 (기록일 기준 일평균, 표시 단계 계산만) ---------- */
