@@ -530,7 +530,7 @@ days.forEach(d => (d.agents || []).forEach(a => {
   PJ.set(p.key, g);
 }));
 const pjList = [...PJ.values()].sort((a, b) => b.total - a.total);
-const grandTotal = days.reduce((s, d) => s + d.total_percent, 0);
+const grandTotal = days.reduce((s, d) => s + (d.agents || []).reduce((a, x) => a + x.percent, 0), 0); // 작업별 합 기준(반올림 때문에 일 합계와 소수점 차이 가능)
 const PJ_COLORS = ["#5b8cff", "#38d39f", "#ffb454", "#b78cff", "#ff8fb3", "#6bd5ff", "#ffd166", "#7ee081", "#ff9f6b"];
 const pjColor = (i, g) => g.kind === "common" ? "#5d6a8f" : PJ_COLORS[i % PJ_COLORS.length];
 let pjOneChart = null, pjSel = null;
@@ -568,7 +568,7 @@ let pjOneChart = null, pjSel = null;
   pjList.forEach((g, i) => {
     const tr = document.createElement("tr"); tr.className = "pj-row"; tr.dataset.key = g.name;
     const last = [...g.perDay.keys()].sort().pop();
-    const tag = g.kind === "group" ? `<span class="tag grp">${g.members.size}개 작업 묶음</span>` : g.kind === "common" ? `<span class="tag com">공통</span>` : "";
+    const tag = g.kind === "group" && g.members.size > 1 ? `<span class="tag grp">${g.members.size}개 작업 묶음</span>` : g.kind === "common" ? `<span class="tag com">공통</span>` : "";
     tr.innerHTML = `<td>${g.name}${tag}</td>
       <td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${g.total / maxV * 100}%;background:${pjColor(i, g)}"></div></div></td>
       <td class="num">${pct(g.total)}</td><td class="num share">${(g.total / grandTotal * 100).toFixed(1)}%</td>
@@ -577,7 +577,7 @@ let pjOneChart = null, pjSel = null;
     tbody.appendChild(tr);
   });
   document.getElementById("pjNote").textContent =
-    "누적 = 기록된 날의 일일 예산 % 합계, 점유 = 전체 누적 대비 비율(" + pct(grandTotal) + " 기준, 기록 " + days.length + "일). " +
+    "누적 = 기록된 날의 일일 예산 % 합계, 점유 = 작업별 누적 합(" + pct(grandTotal) + ") 대비 비율, 기록 " + days.length + "일. " +
     "이름에 같은 프로젝트명이 있는 작업만 묶고, 불분명한 작업은 따로 둡니다. 개별 작업은 반올림되어 합계와 소수점 차이가 날 수 있습니다.";
 })();
 
