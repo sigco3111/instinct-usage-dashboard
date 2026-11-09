@@ -183,6 +183,8 @@
   .cell.none { border-style: dashed; color: var(--dim);
     background: repeating-linear-gradient(135deg, rgba(143,155,184,.10) 0 6px, transparent 6px 12px); }
   .cell.none .p { font-size: 11px; font-weight: 600; }
+  .cell.none.colab { border-color: var(--accent); }
+  .cell.none.colab .p { color: var(--accent); }
   .cell.rec { cursor: pointer; border-color: transparent; }
   .cell.rec:hover { outline: 2px solid #fff6; }
   .cell.l0 { background: #1b2447; border: 1px solid #36427a; }
@@ -582,21 +584,35 @@ function mergedAgents(day) {
 
 const byDate = new Map(days.map(d => [d.date, d]));
 const dateList = days.map(d => d.date);
+// 날짜 선택은 사용량 또는 협업 기록이 있는 날 전체 (사용량 집계·그래프는 dateList만 사용)
+const collabDateSet = new Set((COLLAB.history || []).map(h => h.date));
+const selDates = [...new Set([...dateList, ...collabDateSet])].sort();
 
 /* ---------- 1) 날짜별 상세 ---------- */
 const dateSelect = document.getElementById("dateSelect");
-dateList.slice().reverse().forEach(dt => {
+selDates.slice().reverse().forEach(dt => {
   const opt = document.createElement("option");
-  opt.value = dt; opt.textContent = dt;
+  opt.value = dt; opt.textContent = dt + (byDate.has(dt) ? "" : " (사용량 미기록)");
   dateSelect.appendChild(opt);
 });
-dateSelect.value = dateList[dateList.length - 1] || "";
+dateSelect.value = selDates[selDates.length - 1] || "";
 
 let gaugeChart = null, agentChart = null;
 
 function renderDay(dt) {
   const day = byDate.get(dt);
-  if (!day) return;
+  if (!day) {
+    // 협업 기록만 있는 날: 사용량은 0이 아니라 미기록
+    document.getElementById("gaugePct").textContent = "미기록";
+    document.getElementById("gaugeDate").textContent = dt;
+    if (gaugeChart) { gaugeChart.destroy(); gaugeChart = null; }
+    if (agentChart) { agentChart.destroy(); agentChart = null; }
+    document.getElementById("gaugeScale").textContent = "이 날짜는 사용량 기록이 없습니다. 0%가 아니라 미기록입니다.";
+    document.querySelector("#agentTable tbody").innerHTML =
+      '<tr><td>사용량 미기록 — 0%로 집계하지 않습니다</td><td class="bar-cell"></td><td class="num">-</td></tr>';
+    if (window.__renderDayCollab) window.__renderDayCollab(dt);
+    return;
+  }
   const agents = mergedAgents(day);
 
   document.getElementById("gaugePct").textContent = pct(day.total_percent);
@@ -655,9 +671,9 @@ function renderDay(dt) {
   if (window.__renderDayCollab) window.__renderDayCollab(dt);
 }
 dateSelect.addEventListener("change", () => { renderDay(dateSelect.value); syncNav(); });
-function syncNav() { const i = dateList.indexOf(dateSelect.value); document.getElementById("dayPrev").disabled = i <= 0; document.getElementById("dayNext").disabled = i < 0 || i >= dateList.length - 1; }
-document.getElementById("dayPrev").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i > 0) { dateSelect.value = dateList[i - 1]; renderDay(dateSelect.value); syncNav(); } };
-document.getElementById("dayNext").onclick = () => { const i = dateList.indexOf(dateSelect.value); if (i < dateList.length - 1) { dateSelect.value = dateList[i + 1]; renderDay(dateSelect.value); syncNav(); } };
+function syncNav() { const i = selDates.indexOf(dateSelect.value); document.getElementById("dayPrev").disabled = i <= 0; document.getElementById("dayNext").disabled = i < 0 || i >= selDates.length - 1; }
+document.getElementById("dayPrev").onclick = () => { const i = selDates.indexOf(dateSelect.value); if (i > 0) { dateSelect.value = selDates[i - 1]; renderDay(dateSelect.value); syncNav(); } };
+document.getElementById("dayNext").onclick = () => { const i = selDates.indexOf(dateSelect.value); if (i < selDates.length - 1) { dateSelect.value = selDates[i + 1]; renderDay(dateSelect.value); syncNav(); } };
 document.addEventListener("pfchange", () => {
   if (dateSelect.value) renderDay(dateSelect.value);
   syncNav();
@@ -937,7 +953,15 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
     const wk = DOW[wd(dt)] + "요일";
     const day = byDate.get(dt);
     if (!day) {
-      box.innerHTML = `<div class="t">${dt} (${wk})</div><div>기록 없음 — 사용량 0%가 아니라 <b>미기록</b>입니다.</div>`; return;
+      const hasCollab = collabDateSet.has(dt);
+      box.innerHTML = `<div class="t">${dt} (${wk})</div><div>사용량 0%가 아니라 <b>미기록</b>입니다.${hasCollab ? " 협업 기록은 있습니다." : ""}</div>` +
+        (hasCollab ? `<button class="go" id="calGo">이 날짜 상세 보기 ↓</button>` : "");
+      const go = document.getElementById("calGo");
+      if (go) go.onclick = () => {
+        dateSelect.value = dt; renderDay(dt); syncNav();
+        document.getElementById("dateSelect").closest(".card").scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+      return;
     }
     let list = mergedAgents(day);
     if (F) list = list.filter(a => projectOf(a.name).key === F);
@@ -982,7 +1006,8 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
         el.onclick = () => pick(dt);
       } else if (dt > todayKST) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
       else if (dt < firstDate) { cls += " future"; el.innerHTML = `<span class="d">${dd}</span>`; }
-      else { cls += " none"; miss++; el.innerHTML = `<span class="d">${dd}</span><span class="p">미기록</span>`;
+      else { cls += " none"; miss++; if (collabDateSet.has(dt)) cls += " colab";
+        el.innerHTML = `<span class="d">${dd}</span><span class="p">${collabDateSet.has(dt) ? "협업" : "미기록"}</span>`;
         el.onclick = () => pick(dt); el.style.cursor = "pointer"; }
       if (isToday) cls += " today";
       if (dt === selDate) cls += " sel";
@@ -996,6 +1021,7 @@ if (pjList.length) showProject(pjList.find(g => g.kind !== "common").name);
   function legend() {
     document.getElementById("calLegend").innerHTML =
       `<span><i style="background:repeating-linear-gradient(135deg,rgba(143,155,184,.25) 0 4px,transparent 4px 8px);border:1px dashed var(--dim)"></i>미기록</span>` +
+      `<span><i style="border:1px dashed var(--accent)"></i>협업 기록(사용량 미기록)</span>` +
       (F ? `<span><i style="border:1px dashed #36427a"></i>이 프로젝트 항목 없음</span>` : `<span><i class="l0" style="background:#1b2447;border-color:#36427a"></i>0%</span>`) +
       `<span><i style="background:#1f3a78"></i>~${r(T1)}%</span><span><i style="background:#2a5bc4"></i>~${r(T2)}%</span>` +
       `<span><i style="background:#4b82ff"></i>~${r(T3)}%</span><span><i style="background:#9ec0ff"></i>~${r(maxV)}%</span>` +
