@@ -607,6 +607,7 @@ function renderDay(dt) {
     document.getElementById("gaugeDate").textContent = dt;
     if (gaugeChart) { gaugeChart.destroy(); gaugeChart = null; }
     if (agentChart) { agentChart.destroy(); agentChart = null; }
+    document.querySelector("#agentChart").parentElement.style.height = "0px";
     document.getElementById("gaugeScale").textContent = "이 날짜는 사용량 기록이 없습니다. 0%가 아니라 미기록입니다.";
     document.querySelector("#agentTable tbody").innerHTML =
       '<tr><td>사용량 미기록 — 0%로 집계하지 않습니다</td><td class="bar-cell"></td><td class="num">-</td></tr>';
