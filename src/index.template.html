@@ -387,6 +387,8 @@
         <thead><tr><th>작업 (에이전트)</th><th class="bar-cell"></th><th class="num">사용률</th></tr></thead>
         <tbody></tbody>
       </table>
+      <h3 style="margin:22px 0 2px;font-size:14px">이날의 협업 <span class="hint" style="font-weight:400">그날 확인된 기록만 보여줍니다</span></h3>
+      <div id="dayCollab"></div>
     </div>
 
     <div class="card wide tab-panel" data-tab="projects">
@@ -650,6 +652,7 @@ function renderDay(dt) {
   const trTotal = document.createElement("tr");
   trTotal.innerHTML = `<td><strong>합계</strong></td><td class="bar-cell"></td><td class="num"><strong>${pct(day.total_percent)}</strong></td>`;
   tbody.appendChild(trTotal);
+  if (window.__renderDayCollab) window.__renderDayCollab(dt);
 }
 dateSelect.addEventListener("change", () => { renderDay(dateSelect.value); syncNav(); });
 function syncNav() { const i = dateList.indexOf(dateSelect.value); document.getElementById("dayPrev").disabled = i <= 0; document.getElementById("dayNext").disabled = i < 0 || i >= dateList.length - 1; }
@@ -1463,9 +1466,10 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     const lis = (items && items.length ? items : ["없음"]).map(t => `<li>${esc(t)}</li>`).join("");
     return `<div class="cb-col"><h4>${esc(title)}</h4><ul>${lis}</ul></div>`;
   };
-  root.innerHTML = (COLLAB.agents || []).map(a => `
+  const agentHtml = a => `
     <div class="cb-agent">
       <h3>${esc(a.name)} <span class="cb-kind">${esc(a.kind || "")}</span>${a.status ? `<span class="cb-status">${esc(a.status)}</span>` : ""}</h3>
+      ${a.summary ? `<p class="hint" style="margin:6px 0 0">${esc(a.summary)}</p>` : ""}
       ${(a.projects || []).map(p => `
         <div class="cb-project">
           <div class="cb-pj-head">${esc(p.name)} <span class="cb-period">${esc(p.period || "")}</span> <span class="cb-state ${esc(p.state || "")}">${esc(STATE_LABEL[p.state] || p.state || "")}</span></div>
@@ -1475,7 +1479,31 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
             ${colHtml("아직 기다리는 일", p.waiting)}
           </div>
         </div>`).join("")}
-    </div>`).join("");
+    </div>`;
+  root.innerHTML = (COLLAB.agents || []).map(agentHtml).join("");
+
+  /* 날짜별 상세: 그날의 협업 스냅샷 (기록된 날만, 추측으로 채우지 않음) */
+  const hist = (COLLAB.history || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const collabByDate = new Map(hist.map(h => [h.date, h]));
+  const firstHistDate = hist.length ? hist[0].date : null;
+  window.__renderDayCollab = function (dt) {
+    const box = document.getElementById("dayCollab");
+    if (!box) return;
+    const h = collabByDate.get(dt);
+    if (!h) {
+      const why = firstHistDate && dt < firstHistDate
+        ? "협업 기록 시작(" + firstHistDate + ") 이전 날짜입니다."
+        : "이 날짜에는 확인된 협업 기록이 없습니다.";
+      box.innerHTML = `<p class="hint">${why} 기록이 없다고 해서 그날 협업이 없었다는 뜻은 아닙니다.</p>`;
+      return;
+    }
+    const stamp = h.updated_at
+      ? (String(h.updated_at).length > 10 ? "확인 시각 " + String(h.updated_at).slice(0, 16).replace("T", " ") : "그날 마감 시점에 확인된 기록")
+      : "";
+    box.innerHTML = (h.agents || []).map(agentHtml).join("") +
+      (stamp ? `<p class="hint" style="margin-top:6px">${esc(stamp)}</p>` : "");
+  };
+  if (typeof dateSelect !== "undefined" && dateSelect.value) window.__renderDayCollab(dateSelect.value);
 })();
 
 /* ---------- 모바일 탭 ---------- */
