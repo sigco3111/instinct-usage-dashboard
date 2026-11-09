@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
-    "updated_at": "2026-11-08T23:50:30+09:00"
+    "updated_at": "2026-11-09T23:49:50+09:00"
   },
   "days": [
     {
@@ -370,7 +370,7 @@
         },
         {
           "name": "기타 에이전트 (1)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -443,11 +443,11 @@
       "agents": [
         {
           "name": "삼국지11 3D 샌드박스 게임 개발",
-          "percent": 7.0
+          "percent": 7
         },
         {
           "name": "main_agent",
-          "percent": 2.0
+          "percent": 2
         },
         {
           "name": "삼국지 초상화 제작",
@@ -490,7 +490,7 @@
         },
         {
           "name": "기타 에이전트 (2)",
-          "percent": 1.0
+          "percent": 1
         }
       ]
     },
@@ -505,7 +505,7 @@
         },
         {
           "name": "삼국지 초상화 제작 복구·계속",
-          "percent": 1.0
+          "percent": 1
         },
         {
           "name": "삼국지 초상화 제작 이어가기",
@@ -517,7 +517,7 @@
         },
         {
           "name": "기타 에이전트 (1)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -536,18 +536,18 @@
         },
         {
           "name": "삼국지 초상화 제작",
-          "percent": 1.0
+          "percent": 1
         },
         {
           "name": "기타 에이전트 (2)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
     {
       "date": "2026-11-03",
-      "total_percent": 8.0,
-      "remaining_percent": 92.0,
+      "total_percent": 8,
+      "remaining_percent": 92,
       "agents": [
         {
           "name": "main_agent",
@@ -563,7 +563,7 @@
         },
         {
           "name": "기타 에이전트 (4)",
-          "percent": 0.0
+          "percent": 0
         }
       ]
     },
@@ -578,7 +578,7 @@
         },
         {
           "name": "세 저장소 한글화",
-          "percent": 2.0
+          "percent": 2
         },
         {
           "name": "삼국지11 게임 개발",
@@ -636,7 +636,7 @@
       "agents": [
         {
           "name": "천하삼분 개발",
-          "percent": 7.0
+          "percent": 7
         },
         {
           "name": "메인",
@@ -658,8 +658,8 @@
     },
     {
       "date": "2026-11-07",
-      "total_percent": 9.0,
-      "remaining_percent": 91.0,
+      "total_percent": 9,
+      "remaining_percent": 91,
       "agents": [
         {
           "name": "천하삼분 지속 개발 후속",
@@ -709,6 +709,29 @@
           "percent": 1.9
         }
       ]
+    },
+    {
+      "date": "2026-11-09",
+      "total_percent": 23.4,
+      "remaining_percent": 76.6,
+      "agents": [
+        {
+          "name": "회귀투자게임 vooy 공동 2차 기획",
+          "percent": 9.5
+        },
+        {
+          "name": "리턴 지속개발·vooy 협업",
+          "percent": 7.1
+        },
+        {
+          "name": "메인",
+          "percent": 3.1
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 3.7
+        }
+      ]
     }
   ]
-        }
+}
