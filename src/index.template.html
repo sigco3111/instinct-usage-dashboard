@@ -301,6 +301,25 @@
   @media (max-width: 760px) { .subnav { position: sticky; top: 0; z-index: 6; background: rgba(11,16,32,.92); padding: 8px 0; margin: 0 -2px; } }
   #wkTable tbody tr { cursor: pointer; }
   #wkTable tbody tr:hover td { background: rgba(91,140,255,.08); }
+
+  /* ===== v12: 다른 에이전트 협업 ===== */
+  .cb-agent { background: #0d1430; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+  .cb-agent h3 { font-size: 15px; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cb-kind { font-size: 11px; color: var(--dim); font-weight: 400; }
+  .cb-status { margin-left: auto; font-size: 11px; color: var(--dim); font-weight: 400; }
+  .cb-project { border-top: 1px solid var(--line); padding: 10px 0 2px; margin-top: 10px; }
+  .cb-pj-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 700; font-size: 13.5px; }
+  .cb-period { font-size: 11.5px; color: var(--dim); font-weight: 400; }
+  .cb-state { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+  .cb-state.active { color: var(--good); border-color: rgba(56,211,159,.45); }
+  .cb-state.done { color: var(--dim); }
+  .cb-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+  .cb-col h4 { font-size: 11.5px; color: var(--dim); font-weight: 600; margin: 0 0 4px; }
+  .cb-col ul { list-style: none; font-size: 12.5px; margin: 0; padding: 0; }
+  .cb-col li { padding: 4px 0 4px 14px; position: relative; border-bottom: 1px dashed var(--line); }
+  .cb-col li:last-child { border-bottom: none; }
+  .cb-col li::before { content: "·"; position: absolute; left: 2px; color: var(--accent); font-weight: 800; }
+  @media (max-width: 760px) { .cb-cols { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
@@ -501,6 +520,12 @@
     </div>
   </div>
 
+    <div class="card wide tab-panel" data-tab="collab" id="sec-collab">
+      <h2>다른 에이전트와 협업</h2>
+      <p class="hint" id="collabNote"></p>
+      <div id="collabAgents"></div>
+    </div>
+
   <footer id="footernote"></footer>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="화면 전환">
@@ -508,10 +533,12 @@
   <button data-tab="projects">프로젝트</button>
   <button data-tab="trend">추이</button>
   <button data-tab="stats">통계</button>
+  <button data-tab="collab">협업</button>
 </nav>
 
 <script>
 const DATA = __USAGE_DATA__;
+const COLLAB = __COLLABORATION_DATA__;
 const meta = DATA.meta || {};
 const days = (DATA.days || []).slice().sort((a, b) => a.date.localeCompare(b.date));
 
@@ -1421,6 +1448,36 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
   window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - off, behavior: "smooth" });
 }));
 
+/* ---------- 다른 에이전트 협업 ---------- */
+(function collab() {
+  const root = document.getElementById("collabAgents");
+  if (!root) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const meta = COLLAB.meta || {};
+  const note = [];
+  if (meta.note) note.push(meta.note);
+  if (meta.updated_at) note.push("마지막 갱신 " + meta.updated_at.slice(0, 16).replace("T", " "));
+  document.getElementById("collabNote").textContent = note.join(" · ");
+  const STATE_LABEL = { active: "진행 중", done: "완료", waiting: "대기" };
+  const colHtml = (title, items) => {
+    const lis = (items && items.length ? items : ["없음"]).map(t => `<li>${esc(t)}</li>`).join("");
+    return `<div class="cb-col"><h4>${esc(title)}</h4><ul>${lis}</ul></div>`;
+  };
+  root.innerHTML = (COLLAB.agents || []).map(a => `
+    <div class="cb-agent">
+      <h3>${esc(a.name)} <span class="cb-kind">${esc(a.kind || "")}</span>${a.status ? `<span class="cb-status">${esc(a.status)}</span>` : ""}</h3>
+      ${(a.projects || []).map(p => `
+        <div class="cb-project">
+          <div class="cb-pj-head">${esc(p.name)} <span class="cb-period">${esc(p.period || "")}</span> <span class="cb-state ${esc(p.state || "")}">${esc(STATE_LABEL[p.state] || p.state || "")}</span></div>
+          <div class="cb-cols">
+            ${colHtml("맡긴 일", p.assigned)}
+            ${colHtml("실제 회신·결과", p.replied)}
+            ${colHtml("아직 기다리는 일", p.waiting)}
+          </div>
+        </div>`).join("")}
+    </div>`).join("");
+})();
+
 /* ---------- 모바일 탭 ---------- */
 (function tabs() {
   const btns = document.querySelectorAll("#tabbar button"), panels = document.querySelectorAll(".tab-panel");
@@ -1439,4 +1496,3 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
 </script>
 </body>
 </html>
-
