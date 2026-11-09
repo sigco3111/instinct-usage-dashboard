@@ -9,10 +9,12 @@
 ## 구조
 
 ```
-data/usage.json            ← 모든 기록이 들어있는 데이터 파일 (유일한 입력)
+data/usage.json            ← 모든 사용량 기록이 들어있는 데이터 파일
+data/collaboration.json    ← 다른 에이전트 협업: 최신 상태(agents) + 날짜별 스냅샷(history)
 src/index.template.html    ← 대시보드 템플릿 (차트: Chart.js)
 scripts/build.py           ← data + template -> dist/index.html (완전 정적)
-scripts/append_day.py      ← 하루치 기록을 data에 추가/교체
+scripts/append_day.py      ← 하루치 사용량 기록을 data에 추가/교체
+scripts/append_collab_snapshot.py  ← 하루치 협업 스냅샷을 history에 추가/교체
 .github/workflows/dashboard.yml  ← push 시 자동 빌드 → GitHub Pages 배포
 ```
 
@@ -33,6 +35,16 @@ git add data/usage.json && git commit -m "기록: 2026-10-17" && git push
 
 같은 날짜는 중복 없이 교체됩니다. 이 방법으로 첫 실제 기록이 들어가면
 상태가 자동으로 `live` (샘플 딱지 해제)가 됩니다.
+
+## 협업 날짜별 스냅샷
+
+`data/collaboration.json`의 `history` 배열에 날짜별 협업 상태를 쌓습니다.
+상세 탭에서 날짜를 고르면 그날 스냅샷을 보여주고, 없는 날은 '기록 없음'으로
+표시합니다(협업이 없었다는 뜻으로 해석하지 않음). 규칙:
+
+- 그날 실제로 확인된 사실만 기록합니다. 과거 날짜를 현재 상태로 채우지 않습니다.
+- 같은 날짜는 교체(당일 재갱신), 다른 날짜는 덮어쓰지 않습니다.
+- 추가: `python3 scripts/append_collab_snapshot.py snapshot.json`
 
 ## 매일 자동 집계 ("시작해" 확인 후)
 
