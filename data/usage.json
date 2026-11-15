@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
-    "updated_at": "2026-11-14T23:51:40+09:00"
+    "updated_at": "2026-11-15T23:52:00+09:00"
   },
   "days": [
     {
@@ -872,6 +872,37 @@
         {
           "name": "기타 에이전트 (3)",
           "percent": 0.5
+        }
+      ],
+      "remaining_percent": 88.3
+    },
+    {
+      "date": "2026-11-15",
+      "total_percent": 11.7,
+      "agents": [
+        {
+          "name": "리턴 본편 개발",
+          "percent": 8.4
+        },
+        {
+          "name": "메인",
+          "percent": 1.5
+        },
+        {
+          "name": "README 스크린샷 마무리",
+          "percent": 0.7
+        },
+        {
+          "name": "리턴 자료·이미지 협업",
+          "percent": 0.6
+        },
+        {
+          "name": "유튜브 영상 제작",
+          "percent": 0.2
+        },
+        {
+          "name": "기타 에이전트 (5)",
+          "percent": 0.3
         }
       ],
       "remaining_percent": 88.3
