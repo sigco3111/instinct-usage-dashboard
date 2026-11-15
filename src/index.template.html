@@ -1488,6 +1488,12 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
   if (meta.note) note.push(meta.note);
   if (meta.updated_at) note.push("마지막 갱신 " + meta.updated_at.slice(0, 16).replace("T", " "));
   document.getElementById("collabNote").textContent = note.join(" · ");
+  if (meta.naming_note) {
+    const nn = document.createElement("p");
+    nn.className = "hint";
+    nn.textContent = meta.naming_note;
+    document.getElementById("collabNote").after(nn);
+  }
   const STATE_LABEL = { active: "진행 중", done: "완료", waiting: "대기" };
   const colHtml = (title, items) => {
     const lis = (items && items.length ? items : ["없음"]).map(t => `<li>${esc(t)}</li>`).join("");
