@@ -321,6 +321,9 @@
   .cb-col li { padding: 4px 0 4px 14px; position: relative; border-bottom: 1px dashed var(--line); }
   .cb-col li:last-child { border-bottom: none; }
   .cb-col li::before { content: "·"; position: absolute; left: 2px; color: var(--accent); font-weight: 800; }
+  .cb-state.changed { color: var(--accent); border-color: rgba(91,140,255,.45); }
+  .cb-full { margin-top: 10px; }
+  .cb-full > summary { cursor: pointer; color: var(--dim); font-size: 12px; }
   @media (max-width: 760px) { .cb-cols { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
@@ -389,7 +392,7 @@
         <thead><tr><th>작업 (에이전트)</th><th class="bar-cell"></th><th class="num">사용률</th></tr></thead>
         <tbody></tbody>
       </table>
-      <h3 style="margin:22px 0 2px;font-size:14px">이날의 협업 <span class="hint" style="font-weight:400">그날 확인된 기록만 보여줍니다</span></h3>
+      <h3 style="margin:22px 0 2px;font-size:14px">이날의 협업 <span class="hint" style="font-weight:400">그날 새로 확인된 변동만 보여줍니다</span></h3>
       <div id="dayCollab"></div>
     </div>
 
@@ -1519,6 +1522,62 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
   const hist = (COLLAB.history || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
   const collabByDate = new Map(hist.map(h => [h.date, h]));
   const firstHistDate = hist.length ? hist[0].date : null;
+  /* 날짜별 스냅샷은 그날 마감 시점의 누적 상태라서, "이날의 협업"은 설명대로 그날
+     새로 확인된 변동만 보여주기 위해 바로 전 기록과의 차이를 계산한다.
+     식별자 표기 변경(2026-11-16, meta.naming_note)은 비교할 때만 현재 식별자로
+     정규화하고, 화면에는 그날 기록의 표기를 그대로 쓴다. */
+  const NAME_MAP = { "vooy": "v1", "협업 파트너": "i2", "인스팅트": "i1" };
+  const normAgent = n => NAME_MAP[String(n)] || String(n);
+  const normTxt = s => String(s)
+    .replace(/협업 파트너|인스팅트|vooy/g, m => NAME_MAP[m])
+    .replace(/([iv][0-9])(은|는|이|가|을|를|의|와|과|도|만|에게)/g, "$1");
+  const DIFF_COLS = [["assigned", "새로 맡긴 일"], ["replied", "새 회신·결과"], ["waiting", "새로 기다리는 일"]];
+  const diffDay = (prev, cur) => {
+    const prevAgents = new Map(((prev && prev.agents) || []).map(a => [normAgent(a.name), a]));
+    const out = [];
+    (cur.agents || []).forEach(a => {
+      const pa = prevAgents.get(normAgent(a.name));
+      if (!pa) {
+        out.push({ agent: a, isNew: true, projects: (a.projects || []).map(p => ({ p, isNew: true })) });
+        return;
+      }
+      const prevProjs = new Map((pa.projects || []).map(p => [String(p.name), p]));
+      const projs = [];
+      (a.projects || []).forEach(p => {
+        const pp = prevProjs.get(String(p.name));
+        if (!pp) { projs.push({ p, isNew: true }); return; }
+        const added = {};
+        DIFF_COLS.forEach(([k]) => {
+          const before = new Set((pp[k] || []).map(normTxt));
+          const add = (p[k] || []).filter(t => !before.has(normTxt(t)));
+          if (add.length) added[k] = add;
+        });
+        const stateChanged = String(pp.state || "") !== String(p.state || "")
+          ? { from: pp.state || "", to: p.state || "" } : null;
+        if (stateChanged || Object.keys(added).length) projs.push({ p, isNew: false, stateChanged, added });
+      });
+      if (projs.length) out.push({ agent: a, isNew: false, projects: projs });
+    });
+    return out;
+  };
+  const diffHtml = changes => changes.map(c => {
+    const a = c.agent;
+    return `
+    <div class="cb-agent">
+      <h3>${esc(a.name)} <span class="cb-kind">${esc(a.kind || "")}</span>${a.status ? `<span class="cb-status">${esc(a.status)}</span>` : ""}${c.isNew ? ` <span class="cb-state changed">새 협업 에이전트</span>` : ""}</h3>
+      ${c.projects.map(({ p, isNew, stateChanged, added }) => {
+        const cols = isNew
+          ? `<div class="cb-cols">${colHtml("맡긴 일", p.assigned)}${colHtml("실제 회신·결과", p.replied)}${colHtml("아직 기다리는 일", p.waiting)}</div>`
+          : (parts => parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "")
+              (DIFF_COLS.filter(([k]) => added && added[k]).map(([k, label]) => colHtml(label, added[k])));
+        return `
+        <div class="cb-project">
+          <div class="cb-pj-head">${esc(p.name)} <span class="cb-period">${esc(p.period || "")}</span> <span class="cb-state ${esc(p.state || "")}">${esc(STATE_LABEL[p.state] || p.state || "")}</span>${isNew ? ` <span class="cb-state changed">새 프로젝트</span>` : ""}${stateChanged ? ` <span class="cb-state changed">상태 변경: ${esc(STATE_LABEL[stateChanged.from] || stateChanged.from || "없음")} → ${esc(STATE_LABEL[stateChanged.to] || stateChanged.to || "없음")}</span>` : ""}</div>
+          ${cols}
+        </div>`;
+      }).join("")}
+    </div>`;
+  }).join("");
   window.__renderDayCollab = function (dt) {
     const box = document.getElementById("dayCollab");
     if (!box) return;
@@ -1533,8 +1592,20 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     const stamp = h.updated_at
       ? (String(h.updated_at).length > 10 ? "확인 시각 " + String(h.updated_at).slice(0, 16).replace("T", " ") : "그날 마감 시점에 확인된 기록")
       : "";
-    box.innerHTML = (h.agents || []).map(agentHtml).join("") +
-      (stamp ? `<p class="hint" style="margin-top:6px">${esc(stamp)}</p>` : "");
+    const stampHtml = stamp ? `<p class="hint" style="margin-top:6px">${esc(stamp)}</p>` : "";
+    const prev = hist.filter(x => String(x.date) < String(dt)).pop() || null;
+    if (!prev) {
+      box.innerHTML = `<p class="hint">첫 협업 기록이라 그날 기록 전체를 보여줍니다.</p>` +
+        (h.agents || []).map(agentHtml).join("") + stampHtml;
+      return;
+    }
+    const changes = diffDay(prev, h);
+    const head = changes.length
+      ? diffHtml(changes)
+      : `<p class="hint">이전 기록(${esc(String(prev.date))})과 달라진 내용이 없습니다. 변동이 없었다는 것이지 그날 협업이 없었다는 뜻은 아닙니다.</p>`;
+    box.innerHTML = head + stampHtml +
+      `<details class="cb-full"><summary>그날 마감 시점의 전체 상태 보기(누적)</summary>` +
+      (h.agents || []).map(agentHtml).join("") + `</details>`;
   };
   if (typeof dateSelect !== "undefined" && dateSelect.value) window.__renderDayCollab(dateSelect.value);
 })();
