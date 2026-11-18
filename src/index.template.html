@@ -1532,20 +1532,53 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     .replace(/협업 파트너|인스팅트|vooy/g, m => NAME_MAP[m])
     .replace(/([iv][0-9])(은|는|이|가|을|를|의|와|과|도|만|에게)/g, "$1");
   const DIFF_COLS = [["assigned", "새로 맡긴 일"], ["replied", "새 회신·결과"], ["waiting", "새로 기다리는 일"]];
+  /* 항목 텍스트 안의 명시적 날짜 표기(MM-DD)를 읽는다. 기록 범위(첫 기록일 이후) 밖의
+     숫자 쌍(예: 1996~2003년 자료의 03-03 같은 연도-월 조각)은 날짜로 취급하지 않고,
+     표기가 하나의 날짜로 모일 때만 그 날짜를 쓴다. 여러 날짜가 섞이면 추측하지 않는다. */
+  const REC_YEAR = firstHistDate ? Number(String(firstHistDate).slice(0, 4)) : null;
+  const markerDate = t => {
+    if (!REC_YEAR) return null;
+    const found = new Set();
+    const re = /(\d{1,2})-(\d{1,2})/g;
+    let m;
+    while ((m = re.exec(String(t)))) {
+      const mm = +m[1], dd = +m[2];
+      if (mm < 1 || mm > 12 || dd < 1 || dd > 31) continue;
+      const d = REC_YEAR + "-" + String(mm).padStart(2, "0") + "-" + String(dd).padStart(2, "0");
+      if (d < firstHistDate) continue;
+      found.add(d);
+    }
+    return found.size === 1 ? [...found][0] : null;
+  };
+  /* 선택한 날짜와 다른 날짜가 표기된 항목은 별도 칸으로 분리한다(표기 기준, 확정 아님).
+     표기가 없거나 여러 날짜면 그날 변동 목록에 그대로 둔다. */
+  const splitByMarker = (items, dt) => {
+    const main = [], other = [];
+    (items || []).forEach(t => {
+      const d = markerDate(t);
+      if (d && d !== String(dt)) other.push({ d, t });
+      else main.push(t);
+    });
+    return { main, other };
+  };
+  const otherHtml = others => !others.length ? "" :
+    `<div class="cb-col"><h4>다른 날짜 표기 항목 (표기 기준·확정 아님)</h4><ul>${
+      others.map(o => `<li>(${esc(o.d.slice(5))} 표기) ${esc(o.t)}</li>`).join("")
+    }</ul></div>`;
   const diffDay = (prev, cur) => {
     const prevAgents = new Map(((prev && prev.agents) || []).map(a => [normAgent(a.name), a]));
     const out = [];
     (cur.agents || []).forEach(a => {
       const pa = prevAgents.get(normAgent(a.name));
       if (!pa) {
-        out.push({ agent: a, isNew: true, projects: (a.projects || []).map(p => ({ p, isNew: true })) });
+        out.push({ agent: a, isNew: true, projects: (a.projects || []).map(p => ({ p, isNew: true, dt: cur.date })) });
         return;
       }
       const prevProjs = new Map((pa.projects || []).map(p => [String(p.name), p]));
       const projs = [];
       (a.projects || []).forEach(p => {
         const pp = prevProjs.get(String(p.name));
-        if (!pp) { projs.push({ p, isNew: true }); return; }
+        if (!pp) { projs.push({ p, isNew: true, dt: cur.date }); return; }
         const added = {};
         DIFF_COLS.forEach(([k]) => {
           const before = new Set((pp[k] || []).map(normTxt));
@@ -1554,7 +1587,7 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
         });
         const stateChanged = String(pp.state || "") !== String(p.state || "")
           ? { from: pp.state || "", to: p.state || "" } : null;
-        if (stateChanged || Object.keys(added).length) projs.push({ p, isNew: false, stateChanged, added });
+        if (stateChanged || Object.keys(added).length) projs.push({ p, isNew: false, stateChanged, added, dt: cur.date });
       });
       if (projs.length) out.push({ agent: a, isNew: false, projects: projs });
     });
@@ -1565,11 +1598,27 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     return `
     <div class="cb-agent">
       <h3>${esc(a.name)} <span class="cb-kind">${esc(a.kind || "")}</span>${a.status ? `<span class="cb-status">${esc(a.status)}</span>` : ""}${c.isNew ? ` <span class="cb-state changed">새 협업 에이전트</span>` : ""}</h3>
-      ${c.projects.map(({ p, isNew, stateChanged, added }) => {
-        const cols = isNew
-          ? `<div class="cb-cols">${colHtml("맡긴 일", p.assigned)}${colHtml("실제 회신·결과", p.replied)}${colHtml("아직 기다리는 일", p.waiting)}</div>`
-          : (parts => parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "")
-              (DIFF_COLS.filter(([k]) => added && added[k]).map(([k, label]) => colHtml(label, added[k])));
+      ${c.projects.map(({ p, isNew, stateChanged, added, dt }) => {
+        let cols;
+        if (isNew) {
+          const parts = [], others = [];
+          [["assigned", "맡긴 일"], ["replied", "실제 회신·결과"], ["waiting", "아직 기다리는 일"]].forEach(([k, label]) => {
+            const s = splitByMarker(p[k], dt);
+            if (s.main.length) parts.push(colHtml(label, s.main));
+            others.push(...s.other);
+          });
+          parts.push(otherHtml(others));
+          cols = parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "";
+        } else {
+          const parts = [], others = [];
+          DIFF_COLS.filter(([k]) => added && added[k]).forEach(([k, label]) => {
+            const s = splitByMarker(added[k], dt);
+            if (s.main.length) parts.push(colHtml(label, s.main));
+            others.push(...s.other);
+          });
+          parts.push(otherHtml(others));
+          cols = parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "";
+        }
         return `
         <div class="cb-project">
           <div class="cb-pj-head">${esc(p.name)} <span class="cb-period">${esc(p.period || "")}</span> <span class="cb-state ${esc(p.state || "")}">${esc(STATE_LABEL[p.state] || p.state || "")}</span>${isNew ? ` <span class="cb-state changed">새 프로젝트</span>` : ""}${stateChanged ? ` <span class="cb-state changed">상태 변경: ${esc(STATE_LABEL[stateChanged.from] || stateChanged.from || "없음")} → ${esc(STATE_LABEL[stateChanged.to] || stateChanged.to || "없음")}</span>` : ""}</div>
