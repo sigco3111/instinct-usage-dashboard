@@ -1531,7 +1531,7 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
   const normTxt = s => String(s)
     .replace(/협업 파트너|인스팅트|vooy/g, m => NAME_MAP[m])
     .replace(/([iv][0-9])(은|는|이|가|을|를|의|와|과|도|만|에게)/g, "$1");
-  const DIFF_COLS = [["assigned", "새로 맡긴 일"], ["replied", "새 회신·결과"], ["waiting", "새로 기다리는 일"]];
+  const DIFF_COLS = [["assigned", "새로 기록된 맡긴 일"], ["replied", "새로 기록된 회신·결과"], ["waiting", "새로 기록된 기다리는 일"]];
   /* 항목 텍스트 안의 명시적 날짜 표기(MM-DD)를 읽는다. 기록 범위(첫 기록일 이후) 밖의
      숫자 쌍(예: 1996~2003년 자료의 03-03 같은 연도-월 조각)은 날짜로 취급하지 않고,
      표기가 하나의 날짜로 모일 때만 그 날짜를 쓴다. 여러 날짜가 섞이면 추측하지 않는다. */
@@ -1550,8 +1550,9 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     }
     return found.size === 1 ? [...found][0] : null;
   };
-  /* 선택한 날짜와 다른 날짜가 표기된 항목은 별도 칸으로 분리한다(표기 기준, 확정 아님).
-     표기가 없거나 여러 날짜면 그날 변동 목록에 그대로 둔다. */
+  /* 선택한 날짜와 다른 날짜가 표기된 항목은 이날의 변동에서 숨긴다(누적 보기에는 그대로 남는다).
+     표기가 없거나 여러 날짜면 날짜를 추측할 수 없으므로 그날 변동 목록에 그대로 두되,
+     '그날 발생'이 아니라 '기록에 새로 나타남'으로만 표현한다. */
   const splitByMarker = (items, dt) => {
     const main = [], other = [];
     (items || []).forEach(t => {
@@ -1561,10 +1562,6 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     });
     return { main, other };
   };
-  const otherHtml = others => !others.length ? "" :
-    `<div class="cb-col"><h4>다른 날짜 표기 항목 (표기 기준·확정 아님)</h4><ul>${
-      others.map(o => `<li>(${esc(o.d.slice(5))} 표기) ${esc(o.t)}</li>`).join("")
-    }</ul></div>`;
   const diffDay = (prev, cur) => {
     const prevAgents = new Map(((prev && prev.agents) || []).map(a => [normAgent(a.name), a]));
     const out = [];
@@ -1593,32 +1590,29 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
     });
     return out;
   };
-  const diffHtml = changes => changes.map(c => {
+  const diffHtml = changes => {
+    let excluded = 0;
+    const html = changes.map(c => {
     const a = c.agent;
     return `
     <div class="cb-agent">
       <h3>${esc(a.name)} <span class="cb-kind">${esc(a.kind || "")}</span>${a.status ? `<span class="cb-status">${esc(a.status)}</span>` : ""}${c.isNew ? ` <span class="cb-state changed">새 협업 에이전트</span>` : ""}</h3>
       ${c.projects.map(({ p, isNew, stateChanged, added, dt }) => {
-        let cols;
+        const parts = [];
         if (isNew) {
-          const parts = [], others = [];
           [["assigned", "맡긴 일"], ["replied", "실제 회신·결과"], ["waiting", "아직 기다리는 일"]].forEach(([k, label]) => {
             const s = splitByMarker(p[k], dt);
+            excluded += s.other.length;
             if (s.main.length) parts.push(colHtml(label, s.main));
-            others.push(...s.other);
           });
-          parts.push(otherHtml(others));
-          cols = parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "";
         } else {
-          const parts = [], others = [];
           DIFF_COLS.filter(([k]) => added && added[k]).forEach(([k, label]) => {
             const s = splitByMarker(added[k], dt);
+            excluded += s.other.length;
             if (s.main.length) parts.push(colHtml(label, s.main));
-            others.push(...s.other);
           });
-          parts.push(otherHtml(others));
-          cols = parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "";
         }
+        const cols = parts.length ? `<div class="cb-cols">${parts.join("")}</div>` : "";
         return `
         <div class="cb-project">
           <div class="cb-pj-head">${esc(p.name)} <span class="cb-period">${esc(p.period || "")}</span> <span class="cb-state ${esc(p.state || "")}">${esc(STATE_LABEL[p.state] || p.state || "")}</span>${isNew ? ` <span class="cb-state changed">새 프로젝트</span>` : ""}${stateChanged ? ` <span class="cb-state changed">상태 변경: ${esc(STATE_LABEL[stateChanged.from] || stateChanged.from || "없음")} → ${esc(STATE_LABEL[stateChanged.to] || stateChanged.to || "없음")}</span>` : ""}</div>
@@ -1626,7 +1620,9 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
         </div>`;
       }).join("")}
     </div>`;
-  }).join("");
+    }).join("");
+    return { html, excluded };
+  };
   window.__renderDayCollab = function (dt) {
     const box = document.getElementById("dayCollab");
     if (!box) return;
@@ -1649,10 +1645,14 @@ document.querySelectorAll(".subnav button").forEach(b => b.addEventListener("cli
       return;
     }
     const changes = diffDay(prev, h);
+    const r = diffHtml(changes);
     const head = changes.length
-      ? diffHtml(changes)
+      ? r.html
       : `<p class="hint">이전 기록(${esc(String(prev.date))})과 달라진 내용이 없습니다. 변동이 없었다는 것이지 그날 협업이 없었다는 뜻은 아닙니다.</p>`;
-    box.innerHTML = head + stampHtml +
+    const exclHint = r.excluded
+      ? `<p class="hint">다른 날짜가 표기된 항목 ${r.excluded}건은 이 화면에서는 숨기고 아래 누적 보기에만 표시합니다(표기 기준, 확정 아님).</p>`
+      : "";
+    box.innerHTML = head + exclHint + stampHtml +
       `<details class="cb-full"><summary>그날 마감 시점의 전체 상태 보기(누적)</summary>` +
       (h.agents || []).map(agentHtml).join("") + `</details>`;
   };
