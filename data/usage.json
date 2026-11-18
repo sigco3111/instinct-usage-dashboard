@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
-    "updated_at": "2026-11-17T23:52:00+09:00"
+    "updated_at": "2026-11-18T23:49:00+09:00"
   },
   "days": [
     {
@@ -948,6 +948,29 @@
         }
       ],
       "remaining_percent": 86.3
+    },
+    {
+      "date": "2026-11-18",
+      "total_percent": 15.4,
+      "remaining_percent": 84.6,
+      "agents": [
+        {
+          "name": "디아블로풍 게임 상세 실행계획",
+          "percent": 4.7
+        },
+        {
+          "name": "Codex of Conquest 한글화",
+          "percent": 3.0
+        },
+        {
+          "name": "잿빛 서약 지속 개발",
+          "percent": 1.8
+        },
+        {
+          "name": "기타 에이전트 (18)",
+          "percent": 6.0
+        }
+      ]
     }
   ]
 }
