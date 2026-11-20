@@ -1,0 +1,1018 @@
+{
+  "meta": {
+    "title": "Instinct 사용량 대시보드",
+    "unit": "percent_of_daily_budget",
+    "unit_label": "일일 예산 대비 %",
+    "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
+    "status": "live",
+    "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
+    "updated_at": "2026-11-20T23:50:00+09:00"
+  },
+  "days": [
+    {
+      "date": "2026-10-16",
+      "total_percent": 6,
+      "agents": [
+        {
+          "name": "공급망 타이쿤 개발",
+          "percent": 5.4
+        },
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.6
+        },
+        {
+          "name": "FLOW CAPITAL 기획서 v1.3",
+          "percent": 0.1
+        },
+        {
+          "name": "hero-lord-web 개선 제안",
+          "percent": 0
+        },
+        {
+          "name": "사용량 대시보드 샘플",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (3)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-17",
+      "total_percent": 0.8,
+      "agents": [
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.7
+        },
+        {
+          "name": "생태계 수족관 설계 2",
+          "percent": 0.1
+        },
+        {
+          "name": "다음 생 오마주 설계서",
+          "percent": 0.1
+        },
+        {
+          "name": "kkiritest 사이트 분석",
+          "percent": 0
+        },
+        {
+          "name": "생태계 수족관 설계",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (1)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "total_percent": 0.6,
+      "agents": [
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.5
+        },
+        {
+          "name": "푸른 순환 v1.8 배포",
+          "percent": 0.1
+        },
+        {
+          "name": "푸른 순환 R19 수조 확장",
+          "percent": 0
+        },
+        {
+          "name": "생태계 수족관 설계 2",
+          "percent": 0
+        },
+        {
+          "name": "usage dashboard 상세·통계",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (5)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "total_percent": 2.3,
+      "remaining_percent": 97.7,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.4
+        },
+        {
+          "name": "SNKRX 오마주 설계서",
+          "percent": 0.4
+        },
+        {
+          "name": "snkrx 2배 해상도 렌더링",
+          "percent": 0.3
+        },
+        {
+          "name": "snkrx 웹 비율 수정",
+          "percent": 0.1
+        },
+        {
+          "name": "한글화 (perilous-ways, Notbell)",
+          "percent": 0.1
+        },
+        {
+          "name": "기타 에이전트 (12)",
+          "percent": 0.1
+        }
+      ]
+    },
+    {
+      "date": "2026-10-20",
+      "total_percent": 5.5,
+      "remaining_percent": 94.5,
+      "agents": [
+        {
+          "name": "SNKRX 오마주 설계서",
+          "percent": 3.9
+        },
+        {
+          "name": "메인 에이전트",
+          "percent": 1.5
+        },
+        {
+          "name": "unchartedwaters2 포크 개선",
+          "percent": 0
+        },
+        {
+          "name": "unchartedwaters2 가능성 검토",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (2)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-21",
+      "total_percent": 1.2,
+      "remaining_percent": 98.8,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 0.8
+        },
+        {
+          "name": "unchartedwaters2 터치 마무리",
+          "percent": 0.2
+        },
+        {
+          "name": "OpenFront 싱글 개선판 개발",
+          "percent": 0.1
+        },
+        {
+          "name": "히어로즈2 웹 한글화",
+          "percent": 0.1
+        },
+        {
+          "name": "unchartedwaters2 포크 개선",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (13)",
+          "percent": 0.1
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "total_percent": 4.5,
+      "remaining_percent": 95.5,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 0.9
+        },
+        {
+          "name": "패권의 시간 마감·저장 확인",
+          "percent": 0.8
+        },
+        {
+          "name": "3개 프로젝트 순차 한글화",
+          "percent": 0.8
+        },
+        {
+          "name": "세계 문명 시뮬레이션 야간 개발",
+          "percent": 0.6
+        },
+        {
+          "name": "패권의 시간 지도 외교·위협 표시",
+          "percent": 0.4
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-10-23",
+      "total_percent": 3,
+      "remaining_percent": 97,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.2
+        },
+        {
+          "name": "시대의 물결 오전8시까지 자율 고도화",
+          "percent": 0.6
+        },
+        {
+          "name": "Genesis Atlas resource economy",
+          "percent": 0.5
+        },
+        {
+          "name": "세계 문명 시뮬레이션 야간 개발",
+          "percent": 0.4
+        },
+        {
+          "name": "Genesis Atlas war history map",
+          "percent": 0
+        },
+        {
+          "name": "기타 에이전트 (30)",
+          "percent": 0.3
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "total_percent": 3.4,
+      "remaining_percent": 96.6,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.3
+        },
+        {
+          "name": "군단 야간 자율 고도화 08시 마감",
+          "percent": 0.8
+        },
+        {
+          "name": "진격의군단 애니메이션군단·게이트레인",
+          "percent": 0.4
+        },
+        {
+          "name": "군단 무장·게이트비주얼개선",
+          "percent": 0.3
+        },
+        {
+          "name": "군단 대규모렌더링경량화",
+          "percent": 0.2
+        },
+        {
+          "name": "기타 에이전트 (19)",
+          "percent": 0.4
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "total_percent": 9.3,
+      "agents": [
+        {
+          "name": "메인 에이전트",
+          "percent": 1.7
+        },
+        {
+          "name": "야구 오마주 단일 경기 검증판",
+          "percent": 3.4
+        },
+        {
+          "name": "군단 게임 방향 재설계 제안",
+          "percent": 0.8
+        },
+        {
+          "name": "군단 야간 자율 고도화 08시 마감",
+          "percent": 0.8
+        },
+        {
+          "name": "사용량 대시보드 고도화 검토",
+          "percent": 0.6
+        },
+        {
+          "name": "기타 에이전트 (19)",
+          "percent": 2.1
+        }
+      ],
+      "remaining_percent": 90.7
+    },
+    {
+      "date": "2026-10-26",
+      "total_percent": 11.1,
+      "remaining_percent": 88.9,
+      "agents": [
+        {
+          "name": "README 2건 및 Tramp 검증 마무리",
+          "percent": 3.2
+        },
+        {
+          "name": "와룡전 전투 UI 한글화",
+          "percent": 3.1
+        },
+        {
+          "name": "RPG 3종 한글화 배포",
+          "percent": 1.2
+        },
+        {
+          "name": "Corsairs·Backrooms 순차 한글화",
+          "percent": 0.6
+        },
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.9
+        },
+        {
+          "name": "기타 에이전트 (17)",
+          "percent": 2.2
+        }
+      ]
+    },
+    {
+      "date": "2026-10-27",
+      "total_percent": 8.7,
+      "remaining_percent": 91.3,
+      "agents": [
+        {
+          "name": "와룡전 실플레이 안정화와 한글화·모바일 개선",
+          "percent": 2.4
+        },
+        {
+          "name": "와룡전 새벽4시까지 목록·회귀·대사 고도화",
+          "percent": 1.9
+        },
+        {
+          "name": "와룡전 전투 UI 한글화",
+          "percent": 1.8
+        },
+        {
+          "name": "와룡전 모바일 재설계와 자연 회귀·번역 교정",
+          "percent": 1.8
+        },
+        {
+          "name": "메인 에이전트 (main_agent)",
+          "percent": 0.8
+        },
+        {
+          "name": "기타 에이전트 (1)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-10-28",
+      "total_percent": 10.9,
+      "remaining_percent": 89.1,
+      "agents": [
+        {
+          "name": "2D·3D 에셋 지속 수집",
+          "percent": 3.4
+        },
+        {
+          "name": "메인 에이전트 (대화/조율)",
+          "percent": 1.2
+        },
+        {
+          "name": "두 저장소 한글화 사전 검토",
+          "percent": 1.1
+        },
+        {
+          "name": "와룡전 최종 검증과 마무리 라운드",
+          "percent": 0.9
+        },
+        {
+          "name": "게임 공용 에셋 라이브러리 검토",
+          "percent": 0.8
+        },
+        {
+          "name": "기타 에이전트 (16)",
+          "percent": 3.5
+        }
+      ]
+    },
+    {
+      "date": "2026-10-29",
+      "total_percent": 13.7,
+      "remaining_percent": 86.3,
+      "agents": [
+        {
+          "name": "배낭 미궁 장기 성장 검증",
+          "percent": 2.8
+        },
+        {
+          "name": "게임 에셋 수집",
+          "percent": 2.7
+        },
+        {
+          "name": "RPG 2종 한글화",
+          "percent": 2.5
+        },
+        {
+          "name": "배낭 미궁 자동 정리",
+          "percent": 0.5
+        },
+        {
+          "name": "메인 에이전트 (대화/조율)",
+          "percent": 1.5
+        },
+        {
+          "name": "기타 에이전트 (29)",
+          "percent": 3.7
+        }
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "total_percent": 13.5,
+      "remaining_percent": 86.5,
+      "agents": [
+        {
+          "name": "삼국지11 3D 샌드박스 게임 개발",
+          "percent": 7
+        },
+        {
+          "name": "main_agent",
+          "percent": 2
+        },
+        {
+          "name": "삼국지 초상화 제작",
+          "percent": 1.7
+        },
+        {
+          "name": "배낭 미궁 거점 복귀 오류 수정",
+          "percent": 0.8
+        },
+        {
+          "name": "배낭 미궁 추가 에셋 검토",
+          "percent": 0.4
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 1.6
+        }
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "total_percent": 12.7,
+      "remaining_percent": 87.3,
+      "agents": [
+        {
+          "name": "삼국지11 게임 지속 개발",
+          "percent": 6.4
+        },
+        {
+          "name": "삼국지11 3D 샌드박스 게임 개발",
+          "percent": 3.9
+        },
+        {
+          "name": "삼국지 초상화 20장 시험 제작",
+          "percent": 1.4
+        },
+        {
+          "name": "삼국지 초상화 제작 이어가기",
+          "percent": 0.1
+        },
+        {
+          "name": "기타 에이전트 (2)",
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "total_percent": 13.6,
+      "remaining_percent": 86.4,
+      "agents": [
+        {
+          "name": "삼국지11 게임 지속 개발",
+          "percent": 11.4
+        },
+        {
+          "name": "삼국지 초상화 제작 복구·계속",
+          "percent": 1
+        },
+        {
+          "name": "삼국지 초상화 제작 이어가기",
+          "percent": 0.6
+        },
+        {
+          "name": "main_agent",
+          "percent": 0.6
+        },
+        {
+          "name": "기타 에이전트 (1)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "total_percent": 11.8,
+      "remaining_percent": 88.2,
+      "agents": [
+        {
+          "name": "삼국지 샌드박스 개발",
+          "percent": 9.3
+        },
+        {
+          "name": "메인",
+          "percent": 1.4
+        },
+        {
+          "name": "삼국지 초상화 제작",
+          "percent": 1
+        },
+        {
+          "name": "기타 에이전트 (2)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "total_percent": 8,
+      "remaining_percent": 92,
+      "agents": [
+        {
+          "name": "main_agent",
+          "percent": 1.4
+        },
+        {
+          "name": "삼국지11 게임 지속 개발",
+          "percent": 6.4
+        },
+        {
+          "name": "삼국지 초상화 제작",
+          "percent": 0.2
+        },
+        {
+          "name": "기타 에이전트 (4)",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "total_percent": 13.8,
+      "remaining_percent": 86.2,
+      "agents": [
+        {
+          "name": "기본 대화",
+          "percent": 2.7
+        },
+        {
+          "name": "세 저장소 한글화",
+          "percent": 2
+        },
+        {
+          "name": "삼국지11 게임 개발",
+          "percent": 1.8
+        },
+        {
+          "name": "초상화 에셋 라이브러리",
+          "percent": 1.2
+        },
+        {
+          "name": "webpro 에디터 개발",
+          "percent": 1.1
+        },
+        {
+          "name": "기타 에이전트 (19)",
+          "percent": 4.8
+        }
+      ]
+    },
+    {
+      "date": "2026-11-05",
+      "total_percent": 13.8,
+      "remaining_percent": 86.2,
+      "agents": [
+        {
+          "name": "포춘 듀오 자율 고도화",
+          "percent": 2.6
+        },
+        {
+          "name": "Repolis 업데이트 가능성 조사",
+          "percent": 1.6
+        },
+        {
+          "name": "AI 동료 협동 합성 디펜스 기획",
+          "percent": 1.5
+        },
+        {
+          "name": "UBOB Editor 문서 최신화",
+          "percent": 1.1
+        },
+        {
+          "name": "메인",
+          "percent": 2.2
+        },
+        {
+          "name": "기타 에이전트 (17)",
+          "percent": 4.7
+        }
+      ]
+    },
+    {
+      "date": "2026-11-06",
+      "total_percent": 13.6,
+      "remaining_percent": 86.4,
+      "agents": [
+        {
+          "name": "천하삼분 개발",
+          "percent": 7
+        },
+        {
+          "name": "메인",
+          "percent": 2.3
+        },
+        {
+          "name": "포춘 듀오 개발",
+          "percent": 1.1
+        },
+        {
+          "name": "3D 에셋 수집 조사",
+          "percent": 0.7
+        },
+        {
+          "name": "기타 에이전트 (12)",
+          "percent": 2.5
+        }
+      ]
+    },
+    {
+      "date": "2026-11-07",
+      "total_percent": 9,
+      "remaining_percent": 91,
+      "agents": [
+        {
+          "name": "천하삼분 지속 개발 후속",
+          "percent": 5.1
+        },
+        {
+          "name": "main_agent",
+          "percent": 1.5
+        },
+        {
+          "name": "삼국지풍 타일·보병 시트 샘플",
+          "percent": 0.8
+        },
+        {
+          "name": "기타 에이전트 (11)",
+          "percent": 1.6
+        }
+      ]
+    },
+    {
+      "date": "2026-11-08",
+      "total_percent": 14.2,
+      "remaining_percent": 85.8,
+      "agents": [
+        {
+          "name": "main_agent",
+          "percent": 2.7
+        },
+        {
+          "name": "천하삼분 지속 개발",
+          "percent": 4.1
+        },
+        {
+          "name": "회귀 투자 게임 개발",
+          "percent": 3.8
+        },
+        {
+          "name": "천하삼분 공용 에셋 등록",
+          "percent": 0.9
+        },
+        {
+          "name": "천하삼분 명칭·README 정비",
+          "percent": 0.8
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 1.9
+        }
+      ]
+    },
+    {
+      "date": "2026-11-09",
+      "total_percent": 23.4,
+      "remaining_percent": 76.6,
+      "agents": [
+        {
+          "name": "회귀투자게임 vooy 공동 2차 기획",
+          "percent": 9.5
+        },
+        {
+          "name": "리턴 지속개발·vooy 협업",
+          "percent": 7.1
+        },
+        {
+          "name": "메인",
+          "percent": 3.1
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 3.7
+        }
+      ]
+    },
+    {
+      "date": "2026-11-10",
+      "total_percent": 19.7,
+      "agents": [
+        {
+          "name": "리턴 핵심 플레이 개발",
+          "percent": 6.3
+        },
+        {
+          "name": "리턴 자료·개발 협업",
+          "percent": 4.6
+        },
+        {
+          "name": "인스팅트",
+          "percent": 2.9
+        },
+        {
+          "name": "날짜별 협업 화면 개선",
+          "percent": 0.4
+        },
+        {
+          "name": "기타 에이전트 (6)",
+          "percent": 5.5
+        }
+      ],
+      "remaining_percent": 80.3
+    },
+    {
+      "date": "2026-11-11",
+      "total_percent": 19.6,
+      "agents": [
+        {
+          "name": "리턴 본편 개발",
+          "percent": 10.6
+        },
+        {
+          "name": "리턴 자료·협업",
+          "percent": 2.5
+        },
+        {
+          "name": "메인",
+          "percent": 2.4
+        },
+        {
+          "name": "리턴 핵심 플레이 비교",
+          "percent": 2.1
+        },
+        {
+          "name": "협업 개선·노하우",
+          "percent": 1.1
+        },
+        {
+          "name": "기타 에이전트 (15)",
+          "percent": 0.9
+        }
+      ],
+      "remaining_percent": 80.4
+    },
+    {
+      "date": "2026-11-12",
+      "total_percent": 25.7,
+      "agents": [
+        {
+          "name": "리턴 본편 지속 개발",
+          "percent": 11.5
+        },
+        {
+          "name": "리턴 개발·협업",
+          "percent": 4.1
+        },
+        {
+          "name": "메인",
+          "percent": 3.7
+        },
+        {
+          "name": "v16 프로젝트 이전·배포 가능성",
+          "percent": 1.7
+        },
+        {
+          "name": "쇼케이스 일일 동기화",
+          "percent": 1.2
+        },
+        {
+          "name": "기타 에이전트 (10)",
+          "percent": 3.4
+        }
+      ],
+      "remaining_percent": 74.3
+    },
+    {
+      "date": "2026-11-13",
+      "total_percent": 12.8,
+      "agents": [
+        {
+          "name": "리턴 본편 개발",
+          "percent": 9.8
+        },
+        {
+          "name": "메인",
+          "percent": 1.5
+        },
+        {
+          "name": "리턴 개발 협업",
+          "percent": 0.5
+        },
+        {
+          "name": "쇼케이스",
+          "percent": 0.2
+        },
+        {
+          "name": "기타 에이전트 (5)",
+          "percent": 0.7
+        }
+      ],
+      "remaining_percent": 87.2
+    },
+    {
+      "date": "2026-11-14",
+      "total_percent": 11.7,
+      "agents": [
+        {
+          "name": "리턴 본편 지속 개발",
+          "percent": 7.9
+        },
+        {
+          "name": "메인",
+          "percent": 2.4
+        },
+        {
+          "name": "쇼케이스 일일 동기화",
+          "percent": 0.6
+        },
+        {
+          "name": "리턴 지속개발·협업",
+          "percent": 0.4
+        },
+        {
+          "name": "기타 에이전트 (3)",
+          "percent": 0.5
+        }
+      ],
+      "remaining_percent": 88.3
+    },
+    {
+      "date": "2026-11-15",
+      "total_percent": 11.7,
+      "agents": [
+        {
+          "name": "리턴 본편 개발",
+          "percent": 8.4
+        },
+        {
+          "name": "메인",
+          "percent": 1.5
+        },
+        {
+          "name": "README 스크린샷 마무리",
+          "percent": 0.7
+        },
+        {
+          "name": "리턴 자료·이미지 협업",
+          "percent": 0.6
+        },
+        {
+          "name": "유튜브 영상 제작",
+          "percent": 0.2
+        },
+        {
+          "name": "기타 에이전트 (5)",
+          "percent": 0.3
+        }
+      ],
+      "remaining_percent": 88.3
+    },
+    {
+      "date": "2026-11-16",
+      "total_percent": 11.6,
+      "agents": [
+        {
+          "name": "공 튕기기 게임",
+          "percent": 5.7
+        },
+        {
+          "name": "리턴 게임",
+          "percent": 0.9
+        },
+        {
+          "name": "기타 에이전트 (14)",
+          "percent": 4.9
+        }
+      ],
+      "remaining_percent": 88.4
+    },
+    {
+      "date": "2026-11-17",
+      "total_percent": 13.7,
+      "agents": [
+        {
+          "name": "잿빛 서약 개발",
+          "percent": 2.6
+        },
+        {
+          "name": "공 튕기기 마무리",
+          "percent": 2.3
+        },
+        {
+          "name": "공 튕기기 시안",
+          "percent": 1.5
+        },
+        {
+          "name": "기타 에이전트 (23)",
+          "percent": 7.3
+        }
+      ],
+      "remaining_percent": 86.3
+    },
+    {
+      "date": "2026-11-18",
+      "total_percent": 15.4,
+      "remaining_percent": 84.6,
+      "agents": [
+        {
+          "name": "디아블로풍 게임 상세 실행계획",
+          "percent": 4.7
+        },
+        {
+          "name": "Codex of Conquest 한글화",
+          "percent": 3.0
+        },
+        {
+          "name": "잿빛 서약 지속 개발",
+          "percent": 1.8
+        },
+        {
+          "name": "기타 에이전트 (18)",
+          "percent": 6.0
+        }
+      ]
+    },
+    {
+      "date": "2026-11-19",
+      "total_percent": 19.7,
+      "remaining_percent": 80.3,
+      "agents": [
+        {
+          "name": "잿빛 서약 개발",
+          "percent": 10.2
+        },
+        {
+          "name": "Codex 한글화",
+          "percent": 3.1
+        },
+        {
+          "name": "기타 에이전트 (27)",
+          "percent": 6.4
+        }
+      ]
+    },
+    {
+      "date": "2026-11-20",
+      "total_percent": 28.4,
+      "remaining_percent": 71.6,
+      "agents": [
+        {
+          "name": "Codex 한글화",
+          "percent": 7.8
+        },
+        {
+          "name": "잿빛 서약",
+          "percent": 5.8
+        },
+        {
+          "name": "SF 핵앤슬래시",
+          "percent": 2.4
+        },
+        {
+          "name": "기타 에이전트 (25)",
+          "percent": 12.4
+        }
+      ]
+    }
+  ]
+}
