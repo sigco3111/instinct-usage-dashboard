@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
-    "updated_at": "2026-11-24T23:51:00+09:00"
+    "updated_at": "2026-11-25T23:51:00+09:00"
   },
   "days": [
     {
@@ -1119,6 +1119,29 @@
         {
           "name": "기타 작업 (30)",
           "percent": 8.6
+        }
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "total_percent": 14.4,
+      "remaining_percent": 85.6,
+      "agents": [
+        {
+          "name": "Grid Breach",
+          "percent": 4.9
+        },
+        {
+          "name": "아케인 서지",
+          "percent": 3.5
+        },
+        {
+          "name": "Cowboys vs Wizards 한글화",
+          "percent": 2.0
+        },
+        {
+          "name": "기타 에이전트 (21)",
+          "percent": 4.0
         }
       ]
     }
