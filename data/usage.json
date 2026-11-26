@@ -6,7 +6,7 @@
     "note": "절대 단위 없이 하루 예산 대비 사용률(%)만 기록합니다. 작업별 수치는 개별 반올림되어 총계와 차이가 날 수 있습니다.",
     "status": "live",
     "status_note": "실제 기록 — 하루 예산 대비 사용률만 기록합니다.",
-    "updated_at": "2026-11-25T23:51:00+09:00"
+    "updated_at": "2026-11-26T23:51:00+09:00"
   },
   "days": [
     {
@@ -1142,6 +1142,33 @@
         {
           "name": "기타 에이전트 (21)",
           "percent": 4.0
+        }
+      ]
+    },
+    {
+      "date": "2026-11-26",
+      "total_percent": 12.2,
+      "remaining_percent": 87.8,
+      "agents": [
+        {
+          "name": "tide 기획 기초조사",
+          "percent": 2.7
+        },
+        {
+          "name": "dangpu 한글화",
+          "percent": 2.5
+        },
+        {
+          "name": "tackle-tactics 한글화",
+          "percent": 1.6
+        },
+        {
+          "name": "아케인 서지 성장·효과 검증",
+          "percent": 1.1
+        },
+        {
+          "name": "기타 에이전트 (13)",
+          "percent": 4.1
         }
       ]
     }
